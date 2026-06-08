@@ -55,14 +55,14 @@ export function MainLayout() {
           </SheetHeader>
           <nav className="flex flex-col gap-1 p-2">
             {visibleMenus.map((item) => {
-              const Icon = (LucideIcons as Record<string, React.ElementType>)[item.icon] ?? LucideIcons.Circle;
+              const IconComponent = (LucideIcons as unknown as Record<string, React.ElementType>)[item.icon] ?? LucideIcons.Circle;
               return (
                 <button
                   key={item.route}
                   onClick={() => { navigate(item.route); setOpen(false); }}
                   className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground text-left w-full"
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <IconComponent className="h-4 w-4 shrink-0" />
                   {item.title}
                 </button>
               );
