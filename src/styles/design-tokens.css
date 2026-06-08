@@ -1,0 +1,16 @@
+:root {
+  /* Modular spacing scale */
+  --s2: 2rem;     /* 32px */
+  --s1: 1.5rem;   /* 24px */
+  --s0: 1rem;     /* 16px (base) */
+  --s-1: 0.5rem;  /* 8px  */
+  --s-2: 0.25rem; /* 4px  */
+
+  /* Cattleya brand colors */
+  --brand-primary: #509b48;
+  --brand-accent: #a4d473;
+  --brand-highlight: #feb234;
+  --brand-surface: #383838;
+  --brand-paper: #f8efe8;
+  --brand-danger: #ef4444;
+}
