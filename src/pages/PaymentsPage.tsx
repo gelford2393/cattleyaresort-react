@@ -7,30 +7,38 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 interface PaymentRow { id: string; type: string; date: string; referenceNo: string; amount: number; bookingNo: string; }
 
-const PAYMENT_TYPES = ['Cash', 'Bank Deposit', 'Bank Transfer'];
-
 export function PaymentsPage() {
   const [date, setDate] = useState('');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const loadPayments = async () => {
     if (!date) return;
     setLoading(true);
-    const snap = await getDocs(query(collection(firestore, 'payments'), where('date', '==', date)));
-    setPayments(snap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRow)));
-    setLoading(false);
+    setError('');
+    try {
+      const snap = await getDocs(query(collection(firestore, 'payments'), where('date', '==', date)));
+      setPayments(snap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRow)));
+    } catch (e: unknown) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const totalByType = (type: string) =>
-    payments.filter((p) => p.type === type).reduce((sum, p) => sum + p.amount, 0);
-
   const grandTotal = payments.reduce((sum, p) => sum + p.amount, 0);
+
+  const grouped = payments.reduce<Record<string, number>>((acc, p) => {
+    acc[p.type] = (acc[p.type] ?? 0) + p.amount;
+    return acc;
+  }, {});
 
   const handlePrint = () => {
     const pdf = new jsPDF();
@@ -55,13 +63,13 @@ export function PaymentsPage() {
         {payments.length > 0 && <Button variant="outline" onClick={handlePrint}>Print PDF</Button>}
       </div>
 
-      {/* Totals by type */}
+      {/* Totals by type — derived from actual payment data */}
       {payments.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {PAYMENT_TYPES.map((type) => (
+          {Object.entries(grouped).map(([type, total]) => (
             <Card key={type}>
               <CardHeader className="pb-1"><CardTitle className="text-sm">{type}</CardTitle></CardHeader>
-              <CardContent><p className="text-xl font-bold">₱{totalByType(type).toLocaleString()}</p></CardContent>
+              <CardContent><p className="text-xl font-bold">₱{total.toLocaleString()}</p></CardContent>
             </Card>
           ))}
           <Card>
@@ -95,6 +103,11 @@ export function PaymentsPage() {
       )}
       {payments.length === 0 && date && !loading && (
         <p className="text-sm text-muted-foreground text-center py-8">No payments found for {date}</p>
+      )}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
     </div>
   );

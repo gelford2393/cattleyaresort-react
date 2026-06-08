@@ -6,21 +6,29 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-interface SlotRow { id: string; pool: string; type: string; bookingNo: string; status: string; }
+interface SlotRow { id: string; pool: string; type: string; bookingNo: string; bookingDocId?: string; status: string; }
 
 export function SlotsPage() {
   const navigate = useNavigate();
   const [date, setDate] = useState('');
   const [slots, setSlots] = useState<SlotRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const loadSlots = async () => {
     if (!date) return;
     setLoading(true);
-    const snap = await getDocs(query(collection(firestore, 'slots'), where('date', '==', date)));
-    setSlots(snap.docs.map((d) => ({ id: d.id, ...d.data() } as SlotRow)));
-    setLoading(false);
+    setError('');
+    try {
+      const snap = await getDocs(query(collection(firestore, 'slots'), where('date', '==', date)));
+      setSlots(snap.docs.map((d) => ({ id: d.id, ...d.data() } as SlotRow)));
+    } catch (e: unknown) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +50,7 @@ export function SlotsPage() {
           </TableHeader>
           <TableBody>
             {slots.map((s) => (
-              <TableRow key={s.id} className="cursor-pointer hover:bg-muted" onClick={() => navigate(`/booking/${s.bookingNo}`)}>
+              <TableRow key={s.id} className="cursor-pointer hover:bg-muted" onClick={() => navigate(`/booking/${s.bookingDocId ?? s.bookingNo}`)}>
                 <TableCell>{s.pool}</TableCell>
                 <TableCell>{s.type}</TableCell>
                 <TableCell className={s.status === 'BOOKED' ? 'text-red-500' : 'text-yellow-600'}>{s.bookingNo}</TableCell>
@@ -54,6 +62,11 @@ export function SlotsPage() {
       )}
       {slots.length === 0 && date && !loading && (
         <p className="text-sm text-muted-foreground text-center py-8">No slots found for {date}</p>
+      )}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
     </div>
   );

@@ -10,6 +10,7 @@ export function CalendarViewPage() {
 
   const handleMonthChange = (d: dayjs.Dayjs) => {
     setCurrentDate(d);
+    setSelectedDate(undefined);
   };
 
   return (

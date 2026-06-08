@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { useAppStore } from '@/store/useAppStore';
-import { Button } from '@/components/ui/button';
 import { CurrentMonth } from '@/components/CurrentMonth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
 interface SlotRecord { pool: string; type: string; date: string; status: string; bookingNo: string; }
@@ -13,24 +13,40 @@ export function PoolSlotPage() {
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [slots, setSlots] = useState<SlotRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const pools = useAppStore((s) => s.pools);
 
-  const loadSlots = async () => {
-    setLoading(true);
-    const startDate = currentDate.startOf('month').format('YYYY-MM-DD');
-    const endDate = currentDate.endOf('month').format('YYYY-MM-DD');
-    const snap = await getDocs(
-      query(collection(firestore, 'slots'), where('date', '>=', startDate), where('date', '<=', endDate))
-    );
-    setSlots(snap.docs.map((d) => d.data() as SlotRecord));
-    setLoading(false);
-  };
+  useEffect(() => {
+    let cancelled = false;
+    const fetchSlots = async () => {
+      setLoading(true);
+      setSlots([]);
+      setError('');
+      const startDate = currentDate.startOf('month').format('YYYY-MM-DD');
+      const endDate = currentDate.endOf('month').format('YYYY-MM-DD');
+      try {
+        const snap = await getDocs(
+          query(collection(firestore, 'slots'), where('date', '>=', startDate), where('date', '<=', endDate))
+        );
+        if (!cancelled) setSlots(snap.docs.map((d) => d.data() as SlotRecord));
+      } catch (e: unknown) {
+        if (!cancelled) setError((e as Error).message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchSlots();
+    return () => { cancelled = true; };
+  }, [currentDate]);
 
-  const getSlotStatus = (poolName: string, type: 'DAY' | 'NIGHT', date: string) => {
-    const slot = slots.find((s) => s.pool === poolName && s.type === type && s.date === date);
-    if (!slot) return null;
-    return slot.status;
-  };
+  const slotMap = useMemo(() => {
+    const m = new Map<string, string>();
+    slots.forEach((s) => m.set(`${s.pool}|${s.type}|${s.date}`, s.status));
+    return m;
+  }, [slots]);
+
+  const getSlotStatus = (poolName: string, type: 'DAY' | 'NIGHT', date: string) =>
+    slotMap.get(`${poolName}|${type}|${date}`) ?? null;
 
   const daysInMonth = currentDate.daysInMonth();
   const days = Array.from({ length: daysInMonth }, (_, i) =>
@@ -43,7 +59,7 @@ export function PoolSlotPage() {
         <h1 className="text-2xl font-bold">Slots per Pool</h1>
         <div className="flex items-center gap-3">
           <CurrentMonth value={currentDate} onChange={setCurrentDate} />
-          <Button onClick={loadSlots} disabled={loading}>Load</Button>
+          {loading && <span className="text-sm text-muted-foreground">Loading...</span>}
         </div>
       </div>
       <div className="text-xs flex gap-3 text-muted-foreground">
@@ -92,6 +108,11 @@ export function PoolSlotPage() {
           </tbody>
         </table>
       </div>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }
