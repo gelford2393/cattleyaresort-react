@@ -11,6 +11,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 
 const ADMIN_UIDS = [
+  "uSPceYzjIVQsCpL3msOXAS3eqR93",
   'BoY0tWkK2GZnjWJIlOF9FgFnv2Q2',
   'GfeK4h5Z4TTGqBEx33QLrBBaNv12',
   'JEoe73fKD1VSTYlhEXgGkftOiAW2',

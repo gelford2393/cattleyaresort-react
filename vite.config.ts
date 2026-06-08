@@ -12,6 +12,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@fullcalendar/react": path.resolve(__dirname, "./node_modules/@fullcalendar/react/dist/index.js"),
+      "@fullcalendar/daygrid": path.resolve(__dirname, "./node_modules/@fullcalendar/daygrid/index.js"),
+      "@fullcalendar/interaction": path.resolve(__dirname, "./node_modules/@fullcalendar/interaction/index.js"),
+      "@fullcalendar/list": path.resolve(__dirname, "./node_modules/@fullcalendar/list/index.js"),
     },
   },
 })

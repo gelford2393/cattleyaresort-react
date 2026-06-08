@@ -1,24 +1,30 @@
 import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA3bsKOhHbKr7zHtz-xulEpip033AvMbbg",
-  authDomain: "cattleyaresort-firestore.firebaseapp.com",
-  projectId: "cattleyaresort-firestore",
-  storageBucket: "cattleyaresort-firestore.appspot.com",
-  messagingSenderId: "706703513289",
-  appId: "1:706703513289:web:b524afe6fccc655a681f18",
-  databaseURL: "https://cattleyaresort-firestore.firebaseio.com",
-  measurementId: "G-NSQ252FR26",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
 const app = initializeApp(firebaseConfig);
+const analytics = typeof window !== 'undefined' ? getAnalytics(app) : undefined;
+const database = import.meta.env.VITE_FIREBASE_DATABASE_URL ? getDatabase(app) : undefined;
 
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
+export const firebaseDatabase = database;
+export const firebaseAnalytics = analytics;
 export default app;

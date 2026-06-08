@@ -71,3 +71,15 @@ export default defineConfig([
   },
 ])
 ```
+
+## Firebase environment setup
+
+This project now reads Firebase config from Vite environment variables.
+
+1. Copy `.env.example` to `.env.local`
+2. Fill in your Firebase web app values from `Project settings > Your apps`
+3. Keep `.env.local` out of version control, which is already ignored by `*.local`
+If you also use Realtime Database, add the optional `VITE_FIREBASE_DATABASE_URL` value as well.
+For server/admin access, keep your service account JSON file outside `src/` and never commit it to Git.
+
+> Note: the old `public/firebase-messaging-sw.js` file has been removed because it contained hard-coded credentials from the prior Firebase project.
