@@ -8,14 +8,12 @@ import { ReservePage } from './pages/ReservePage';
 import { BookingDetailPage } from './pages/BookingDetailPage';
 import { BookingsPage } from './pages/BookingsPage';
 import { BookingsSearchPage } from './pages/BookingsSearchPage';
-
-// Placeholder pages — will be replaced in Task 12
-const Placeholder = ({ name }: { name: string }) => (
-  <div className="p-8 text-center text-muted-foreground">
-    <h2 className="text-xl font-semibold mb-2">{name}</h2>
-    <p>This page is coming soon.</p>
-  </div>
-);
+import { CalendarPage } from './pages/CalendarPage';
+import { CalendarViewPage } from './pages/CalendarViewPage';
+import { SlotsPage } from './pages/SlotsPage';
+import { PoolSlotPage } from './pages/PoolSlotPage';
+import { PaymentsPage } from './pages/PaymentsPage';
+import { ReportsPage } from './pages/ReportsPage';
 
 export default function App() {
   return (
@@ -28,19 +26,19 @@ export default function App() {
       {/* Authenticated */}
       <Route element={<PrivateRoute />}>
         <Route element={<MainLayout />}>
-          <Route path="/calendar-view"    element={<Placeholder name="Calendar View" />} />
-          <Route path="/calendar"         element={<Placeholder name="Calendar" />} />
+          <Route path="/calendar-view"    element={<CalendarViewPage />} />
+          <Route path="/calendar"         element={<CalendarPage />} />
           <Route path="/reserve"          element={<ReservePage />} />
-          <Route path="/slots"            element={<Placeholder name="Slots" />} />
-          <Route path="/poolslot"         element={<Placeholder name="Slots per Pool" />} />
+          <Route path="/slots"            element={<SlotsPage />} />
+          <Route path="/poolslot"         element={<PoolSlotPage />} />
           <Route path="/bookings"         element={<BookingsPage />} />
           <Route path="/bookings-search"  element={<BookingsSearchPage />} />
           <Route path="/booking/:id"      element={<BookingDetailPage />} />
 
           {/* Admin only */}
           <Route element={<RestrictedRoute />}>
-            <Route path="/payments" element={<Placeholder name="Payments" />} />
-            <Route path="/reports"  element={<Placeholder name="Reports" />} />
+            <Route path="/payments" element={<PaymentsPage />} />
+            <Route path="/reports"  element={<ReportsPage />} />
           </Route>
         </Route>
       </Route>
