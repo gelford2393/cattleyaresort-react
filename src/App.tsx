@@ -4,8 +4,12 @@ import { MainLayout } from './layouts/MainLayout';
 import { PrivateRoute } from './routes/PrivateRoute';
 import { RestrictedRoute } from './routes/RestrictedRoute';
 import { LoginPage } from './pages/LoginPage';
+import { ReservePage } from './pages/ReservePage';
+import { BookingDetailPage } from './pages/BookingDetailPage';
+import { BookingsPage } from './pages/BookingsPage';
+import { BookingsSearchPage } from './pages/BookingsSearchPage';
 
-// Placeholder pages — will be replaced in Tasks 10-12
+// Placeholder pages — will be replaced in Task 12
 const Placeholder = ({ name }: { name: string }) => (
   <div className="p-8 text-center text-muted-foreground">
     <h2 className="text-xl font-semibold mb-2">{name}</h2>
@@ -26,12 +30,12 @@ export default function App() {
         <Route element={<MainLayout />}>
           <Route path="/calendar-view"    element={<Placeholder name="Calendar View" />} />
           <Route path="/calendar"         element={<Placeholder name="Calendar" />} />
-          <Route path="/reserve"          element={<Placeholder name="Reserve" />} />
+          <Route path="/reserve"          element={<ReservePage />} />
           <Route path="/slots"            element={<Placeholder name="Slots" />} />
           <Route path="/poolslot"         element={<Placeholder name="Slots per Pool" />} />
-          <Route path="/bookings"         element={<Placeholder name="Bookings" />} />
-          <Route path="/bookings-search"  element={<Placeholder name="Search Bookings" />} />
-          <Route path="/booking/:id"      element={<Placeholder name="Booking Detail" />} />
+          <Route path="/bookings"         element={<BookingsPage />} />
+          <Route path="/bookings-search"  element={<BookingsSearchPage />} />
+          <Route path="/booking/:id"      element={<BookingDetailPage />} />
 
           {/* Admin only */}
           <Route element={<RestrictedRoute />}>
