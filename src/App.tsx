@@ -3,6 +3,7 @@ import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
 import { PrivateRoute } from './routes/PrivateRoute';
 import { RestrictedRoute } from './routes/RestrictedRoute';
+import { LoginPage } from './pages/LoginPage';
 
 // Placeholder pages — will be replaced in Tasks 10-12
 const Placeholder = ({ name }: { name: string }) => (
@@ -17,7 +18,7 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route element={<AuthLayout />}>
-        <Route path="/" element={<Placeholder name="Login" />} />
+        <Route path="/" element={<LoginPage />} />
       </Route>
 
       {/* Authenticated */}
