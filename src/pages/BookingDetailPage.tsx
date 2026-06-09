@@ -215,7 +215,7 @@ export function BookingDetailPage() {
           <Stack className="mt-2 space-y-1 text-sm text-right">
             <Box>Total: <strong>₱{booking.total.toLocaleString()}</strong></Box>
             <Box>Paid: <strong>₱{totalPayments.toLocaleString()}</strong></Box>
-            <Box>Balance: <strong className={balance > 0 ? 'text-red-500' : 'text-green-600'}>₱{balance.toLocaleString()}</strong></Box>
+            <Box>Balance: <strong className={balance > 0 ? 'text-destructive' : 'text-success'}>₱{balance.toLocaleString()}</strong></Box>
           </Stack>
         </CardContent>
       </Card>

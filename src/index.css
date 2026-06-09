@@ -46,6 +46,10 @@
   --color-brand-surface: var(--brand-surface);
   --color-brand-paper: var(--brand-paper);
   --color-brand-danger: var(--brand-danger);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
 }
 
 :root {
@@ -115,6 +119,12 @@
   --sidebar-accent-foreground: oklch(0.985 0.002 247.839);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.62 0.17 143);
+
+  /* Semantic status colors — dark mode */
+  --warning: oklch(0.82 0.15 85);
+  --warning-foreground: oklch(0.2 0.05 85);
+  --success: oklch(0.65 0.17 145);
+  --success-foreground: oklch(0.1 0 0);
 }
 
 @layer base {
@@ -124,4 +134,33 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* FullCalendar dark mode overrides */
+.dark .fc {
+  --fc-border-color: oklch(1 0 0 / 10%);
+  --fc-button-bg-color: oklch(0.274 0.006 286.033);
+  --fc-button-border-color: oklch(1 0 0 / 15%);
+  --fc-button-hover-bg-color: oklch(0.32 0.006 286);
+  --fc-button-hover-border-color: oklch(1 0 0 / 20%);
+  --fc-button-active-bg-color: oklch(0.35 0.006 286);
+  --fc-today-bg-color: oklch(0.62 0.17 143 / 15%);
+  --fc-neutral-bg-color: oklch(0.21 0.006 285.885);
+  --fc-list-event-hover-bg-color: oklch(0.274 0.006 286.033);
+  color: oklch(0.985 0.002 247.839);
+}
+
+.dark .fc .fc-col-header-cell,
+.dark .fc .fc-daygrid-day,
+.dark .fc .fc-scrollgrid {
+  background-color: oklch(0.21 0.006 285.885);
+}
+
+.dark .fc .fc-day-other .fc-daygrid-day-frame {
+  background-color: oklch(0.18 0.005 285);
+}
+
+.dark .fc .fc-daygrid-day-number,
+.dark .fc .fc-col-header-cell-cushion {
+  color: oklch(0.985 0.002 247.839);
 }

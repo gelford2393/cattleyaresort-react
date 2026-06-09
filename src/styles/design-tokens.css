@@ -13,4 +13,10 @@
   --brand-surface: #383838;
   --brand-paper: #f8efe8;
   --brand-danger: #ef4444;
+
+  /* Semantic status colors — light mode */
+  --warning: oklch(0.75 0.15 85);
+  --warning-foreground: oklch(0.3 0.08 85);
+  --success: oklch(0.55 0.15 145);
+  --success-foreground: oklch(1 0 0);
 }

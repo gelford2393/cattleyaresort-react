@@ -40,8 +40,8 @@ export function PoolSlotPage() {
         </Flex>
       </Flex>
       <Flex className="text-xs gap-3 text-muted-foreground">
-        <span><span className="inline-block w-3 h-3 rounded bg-yellow-200 mr-1"></span>Unpaid (PENDING/PENCIL)</span>
-        <span><span className="inline-block w-3 h-3 rounded bg-red-200 mr-1"></span>Paid (BOOKED)</span>
+        <span><span className="inline-block w-3 h-3 rounded bg-warning/40 mr-1"></span>Unpaid (PENDING/PENCIL)</span>
+        <span><span className="inline-block w-3 h-3 rounded bg-destructive/30 mr-1"></span>Paid (BOOKED)</span>
       </Flex>
       <Box className="overflow-x-auto">
         <table className="text-xs border-collapse w-full">
@@ -71,8 +71,8 @@ export function PoolSlotPage() {
                         key={d}
                         className={cn(
                           'border px-1 py-1 text-center',
-                          status === 'BOOKED' ? 'bg-red-100' :
-                          status === 'PENDING' || status === 'PENCIL' ? 'bg-yellow-100' : ''
+                          status === 'BOOKED' ? 'bg-destructive/20' :
+                          status === 'PENDING' || status === 'PENCIL' ? 'bg-warning/20' : ''
                         )}
                       >
                         {status ? '●' : ''}

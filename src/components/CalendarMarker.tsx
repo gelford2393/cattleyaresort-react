@@ -45,7 +45,7 @@ export function CalendarMarker({ date }: Props) {
                 >
                   <TableCell>{s.pool}</TableCell>
                   <TableCell>{s.type}</TableCell>
-                  <TableCell className={s.status === 'BOOKED' ? 'text-red-500' : 'text-yellow-600'}>
+                  <TableCell className={s.status === 'BOOKED' ? 'text-destructive' : 'text-warning'}>
                     {s.bookingNo}
                   </TableCell>
                   <TableCell>{s.status}</TableCell>

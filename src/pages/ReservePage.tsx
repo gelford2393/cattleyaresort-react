@@ -89,10 +89,10 @@ export function ReservePage() {
 
           <div className="lg:sticky lg:top-[var(--s1)] lg:h-fit space-y-[var(--s0)]">
             {selectedSlots.length > 0 && (
-              <Card className="border-green-200 bg-green-50">
+              <Card className="border-primary/30 bg-primary/5">
                 <CardContent className="pt-4">
                   <Stack gap="s-1">
-                    <Text size="small" weight="semibold" className="text-gray-600">Selected: {selectedSlots.length}</Text>
+                    <Text size="small" weight="semibold" className="text-muted-foreground">Selected: {selectedSlots.length}</Text>
                     <div className="max-h-[120px] overflow-y-auto">
                       <Flex gap="s-1" wrap="wrap">
                         {selectedSlots.map((s) => (
@@ -102,8 +102,8 @@ export function ReservePage() {
                         ))}
                       </Flex>
                     </div>
-                    <div className="pt-2 border-t border-green-200">
-                      <Text size="large" weight="bold" className="text-green-700">
+                    <div className="pt-2 border-t border-primary/30">
+                      <Text size="large" weight="bold" className="text-primary">
                         Total: ₱{subTotal.toLocaleString()}
                       </Text>
                     </div>
