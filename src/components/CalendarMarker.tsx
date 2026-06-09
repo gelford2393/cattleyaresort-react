@@ -1,26 +1,17 @@
-import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { firestore } from '@/lib/firebase';
 import { Flex } from '@/components/ui/primitives';
+import { useSlotsByDate } from '@/hooks/useSlots';
 
-interface SlotEntry { pool: string; type: string; bookingNo: string; status: string; }
 interface Props { date: string; }
 
 export function CalendarMarker({ date }: Props) {
-  const [slots, setSlots] = useState<SlotEntry[]>([]);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!date) return;
-    getDocs(query(collection(firestore, 'slots'), where('date', '==', date))).then((snap) => {
-      setSlots(snap.docs.map((d) => d.data() as SlotEntry));
-    });
-  }, [date]);
+  const { data: slots = [] } = useSlotsByDate(date);
 
   const dayCount = slots.filter((s) => s.type === 'DAY').length;
   const nightCount = slots.filter((s) => s.type === 'NIGHT').length;
