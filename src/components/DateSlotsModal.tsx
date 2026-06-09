@@ -14,12 +14,10 @@ import type { Slot } from '@/lib/queries';
 
 type CalendarModalView =
   | { view: 'table' }
-  | { view: 'reserve'; pool: string; date: string; slotType: 'DAY' | 'NIGHT' }
-  | { view: 'booking'; bookingDocId: string };
+  | { view: 'reserve'; pool: string; date: string; slotType: 'DAY' | 'NIGHT' };
 
 type CalendarModalAction =
   | { type: 'open_reserve'; pool: string; date: string; slotType: 'DAY' | 'NIGHT' }
-  | { type: 'open_booking'; bookingDocId: string }
   | { type: 'back_to_table' };
 
 function assertNever(x: never): never {
@@ -30,8 +28,6 @@ function reducer(_state: CalendarModalView, action: CalendarModalAction): Calend
   switch (action.type) {
     case 'open_reserve':
       return { view: 'reserve', pool: action.pool, date: action.date, slotType: action.slotType };
-    case 'open_booking':
-      return { view: 'booking', bookingDocId: action.bookingDocId };
     case 'back_to_table':
       return { view: 'table' };
     default:

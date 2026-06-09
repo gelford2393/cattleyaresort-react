@@ -238,7 +238,7 @@ export function BookingDetailPage() {
 
   if (isModal) {
     return (
-      <Dialog onOpenChange={(isOpen) => !isOpen && navigate(-1)}>
+      <Dialog open onOpenChange={(isOpen) => !isOpen && navigate(-1)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{booking.bookingNo} — {booking.customer}</DialogTitle>
