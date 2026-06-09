@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { firestore } from '@/lib/firebase';
+import { useBookingsByDate } from '@/hooks/useBookings';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/DatePicker';
@@ -15,40 +14,30 @@ import { dateFilterSchema, type DateFilterInput } from '@/lib/form-schemas';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-interface BookingRow {
-  id: string; bookingNo: string; customer: string;
-  total: number; reserveFee: number; status: string; bookingDate: string;
-}
-
 export function BookingsPage() {
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState<BookingRow[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState('');
+  const [submittedDate, setSubmittedDate] = useState('');
   const form = useForm<DateFilterInput>({
     resolver: zodResolver(dateFilterSchema),
     defaultValues: { date: '' },
   });
 
   const dateValue = useWatch({ control: form.control, name: 'date' });
+  const { data: bookings = [], isLoading } = useBookingsByDate(submittedDate);
 
-  const onSubmit = form.handleSubmit(async ({ date }) => {
-    setLoading(true);
-    setSearched(date);
-    const snap = await getDocs(query(collection(firestore, 'bookings'), where('bookingDate', '==', date)));
-    setBookings(snap.docs.map((d) => ({ id: d.id, ...d.data() } as BookingRow)));
-    setLoading(false);
+  const onSubmit = form.handleSubmit(({ date }) => {
+    setSubmittedDate(date);
   });
 
   const handlePrint = () => {
     const pdf = new jsPDF();
-    pdf.text(`Bookings for ${searched}`, 14, 20);
+    pdf.text(`Bookings for ${submittedDate}`, 14, 20);
     autoTable(pdf, {
       startY: 30,
       head: [['Booking No', 'Customer', 'Total', 'Reserve Fee', 'Status']],
       body: bookings.map((b) => [b.bookingNo, b.customer, `₱${b.total.toLocaleString()}`, `₱${b.reserveFee.toLocaleString()}`, b.status]),
     });
-    pdf.save(`bookings-${searched}.pdf`);
+    pdf.save(`bookings-${submittedDate}.pdf`);
   };
 
   const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' =>
@@ -61,14 +50,14 @@ export function BookingsPage() {
         <Flex align="end" className="gap-3">
           <Stack gap="s-2">
             <Label>Date</Label>
-            <DatePicker 
+            <DatePicker
               value={dateValue}
               onChange={(date) => form.setValue('date', date, { shouldValidate: true })}
               placeholder="Select date"
             />
             <FormError message={form.formState.errors.date?.message} />
           </Stack>
-          <Button type="submit" disabled={loading}>Search</Button>
+          <Button type="submit" disabled={isLoading}>Search</Button>
           {bookings.length > 0 && <Button type="button" variant="outline" onClick={handlePrint}>Print PDF</Button>}
         </Flex>
       </form>
@@ -93,8 +82,8 @@ export function BookingsPage() {
           </TableBody>
         </Table>
       )}
-      {bookings.length === 0 && searched && !loading && (
-        <Text size="small" color="muted" className="text-center py-8">No bookings found for {searched}</Text>
+      {bookings.length === 0 && submittedDate && !isLoading && (
+        <Text size="small" color="muted" className="text-center py-8">No bookings found for {submittedDate}</Text>
       )}
     </Stack>
   );
