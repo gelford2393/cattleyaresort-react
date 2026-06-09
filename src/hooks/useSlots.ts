@@ -13,5 +13,6 @@ export function useSlotsByMonth(year: number, month: number) {
   return useQuery({
     queryKey: ['slots', { year, month }],
     queryFn: () => fetchSlotsByMonth(year, month),
+    enabled: !!year && !!month,
   });
 }
