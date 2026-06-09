@@ -17,6 +17,9 @@ import { FormError } from '@/components/FormError';
 import { searchSchema, type SearchInput } from '@/lib/form-schemas';
 import type { Booking } from '@/lib/queries';
 
+const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' =>
+  s === 'BOOKED' ? 'default' : s === 'CANCELLED' ? 'destructive' : 'secondary';
+
 export function BookingsSearchPage() {
   const navigate = useNavigate();
   const [submittedQuery, setSubmittedQuery] = useState('');
@@ -40,9 +43,6 @@ export function BookingsSearchPage() {
       { onSuccess: () => setDeleteTarget(null) }
     );
   };
-
-  const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' =>
-    s === 'BOOKED' ? 'default' : s === 'CANCELLED' ? 'destructive' : 'secondary';
 
   return (
     <Stack gap="s0">
