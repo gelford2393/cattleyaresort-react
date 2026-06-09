@@ -42,15 +42,16 @@ export function BookingDetailPage() {
   const [showDiscount, setShowDiscount] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
 
-  const loadBooking = async () => {
+  useEffect(() => {
     if (!id) return;
-    const snap = await getDoc(doc(firestore, 'bookings', id));
-    if (snap.exists()) setBooking(snap.data() as BookingData);
-    const paySnap = await getDocs(query(collection(firestore, 'payments'), where('bookingDocId', '==', id)));
-    setPayments(paySnap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRecord)));
-  };
-
-  useEffect(() => { loadBooking(); }, [id]);
+    async function loadBooking() {
+      const snap = await getDoc(doc(firestore, 'bookings', id!));
+      if (snap.exists()) setBooking(snap.data() as BookingData);
+      const paySnap = await getDocs(query(collection(firestore, 'payments'), where('bookingDocId', '==', id)));
+      setPayments(paySnap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRecord)));
+    }
+    loadBooking();
+  }, [id]);
 
   const totalPayments = payments.reduce((sum, p) => sum + p.amount, 0);
   const balance = (booking?.total ?? 0) - totalPayments;

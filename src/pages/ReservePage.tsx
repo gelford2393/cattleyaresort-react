@@ -44,6 +44,7 @@ export function ReservePage() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitError('');
+    // eslint-disable-next-line react-hooks/purity
     const bookingNo = `CR-${Date.now()}`;
     try {
       const user = auth.currentUser;
