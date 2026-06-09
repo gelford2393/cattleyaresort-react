@@ -25,6 +25,8 @@ export function useCreatePayment(bookingId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments', 'byBooking', bookingId] });
       queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['slots'] });
     },
   });
 }

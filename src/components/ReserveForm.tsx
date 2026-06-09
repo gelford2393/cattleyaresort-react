@@ -17,10 +17,12 @@ interface ReserveFormProps {
   defaultPool?: string;
   defaultDate?: string;
   defaultSlotType?: 'DAY' | 'NIGHT';
+  hidePoolSelector?: boolean;
+  takenSlots?: { pool: string; type: 'DAY' | 'NIGHT' }[];
   onSuccess?: (bookingDocId: string) => void;
 }
 
-export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, onSuccess }: ReserveFormProps) {
+export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, hidePoolSelector, takenSlots = [], onSuccess }: ReserveFormProps) {
   const pools = useAppStore((s) => s.pools);
   const createBooking = useCreateBooking();
 
@@ -31,6 +33,7 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, onSucce
           pool: preSelectedPool.pool,
           type: defaultSlotType,
           rate: defaultSlotType === 'DAY' ? preSelectedPool.dayRate : preSelectedPool.nightRate,
+          depositRate: preSelectedPool.depositRate,
         }]
       : [];
 
@@ -48,16 +51,19 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, onSucce
   const selectedSlots = useWatch({ control: form.control, name: 'slots' });
   const bookingDateValue = useWatch({ control: form.control, name: 'bookingDate' });
 
-  const toggleSlot = (pool: string, type: 'DAY' | 'NIGHT', rate: number) => {
+  const toggleSlot = (pool: string, type: 'DAY' | 'NIGHT', rate: number, depositRate: number) => {
     const exists = selectedSlots.find((s) => s.pool === pool && s.type === type);
     const next: SlotInput[] = exists
       ? selectedSlots.filter((s) => !(s.pool === pool && s.type === type))
-      : [...selectedSlots, { pool, type, rate }];
+      : [...selectedSlots, { pool, type, rate, depositRate }];
     form.setValue('slots', next, { shouldValidate: true });
   };
 
   const isSelected = (pool: string, type: 'DAY' | 'NIGHT') =>
     selectedSlots.some((s) => s.pool === pool && s.type === type);
+
+  const isTaken = (pool: string, type: 'DAY' | 'NIGHT') =>
+    takenSlots.some((s) => s.pool === pool && s.type === type);
 
   const subTotal = selectedSlots.reduce((sum, s) => sum + s.rate, 0);
 
@@ -70,8 +76,8 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, onSucce
 
   return (
     <form onSubmit={onSubmit}>
-      <div className="grid lg:grid-cols-[1fr_400px] gap-[var(--s1)]">
-        <Box>
+      <div className={hidePoolSelector ? undefined : 'grid lg:grid-cols-[1fr_400px] gap-[var(--s1)]'}>
+        {!hidePoolSelector && <Box>
           <Text size="large" weight="semibold" className="mb-3">Select Pools</Text>
           <div className="max-h-[600px] overflow-y-auto pr-2">
             <Box className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-[var(--s-1)]">
@@ -79,23 +85,31 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, onSucce
                 <Card key={pool.pool} className="p-3 hover:shadow-md transition-shadow cursor-pointer">
                   <Text size="small" weight="medium" className="mb-2">{pool.pool}</Text>
                   <Stack gap="s-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className={`flex items-center gap-2 ${isTaken(pool.pool, 'DAY') ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
                       <input
                         type="checkbox"
                         checked={isSelected(pool.pool, 'DAY')}
-                        onChange={() => toggleSlot(pool.pool, 'DAY', pool.dayRate)}
-                        className="cursor-pointer"
+                        disabled={isTaken(pool.pool, 'DAY')}
+                        onChange={() => toggleSlot(pool.pool, 'DAY', pool.dayRate, pool.depositRate)}
+                        className="cursor-pointer disabled:cursor-not-allowed"
                       />
-                      <Text as="span" size="small">Day ₱{pool.dayRate.toLocaleString()}</Text>
+                      <Text as="span" size="small">
+                        Day ₱{pool.dayRate.toLocaleString()}
+                        {isTaken(pool.pool, 'DAY') && ' (taken)'}
+                      </Text>
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className={`flex items-center gap-2 ${isTaken(pool.pool, 'NIGHT') ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
                       <input
                         type="checkbox"
                         checked={isSelected(pool.pool, 'NIGHT')}
-                        onChange={() => toggleSlot(pool.pool, 'NIGHT', pool.nightRate)}
-                        className="cursor-pointer"
+                        disabled={isTaken(pool.pool, 'NIGHT')}
+                        onChange={() => toggleSlot(pool.pool, 'NIGHT', pool.nightRate, pool.depositRate)}
+                        className="cursor-pointer disabled:cursor-not-allowed"
                       />
-                      <Text as="span" size="small">Night ₱{pool.nightRate.toLocaleString()}</Text>
+                      <Text as="span" size="small">
+                        Night ₱{pool.nightRate.toLocaleString()}
+                        {isTaken(pool.pool, 'NIGHT') && ' (taken)'}
+                      </Text>
                     </label>
                   </Stack>
                 </Card>
@@ -103,7 +117,7 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, onSucce
             </Box>
           </div>
           <FormError message={form.formState.errors.slots?.message} />
-        </Box>
+        </Box>}
 
         <div className="space-y-[var(--s0)]">
           {selectedSlots.length > 0 && (

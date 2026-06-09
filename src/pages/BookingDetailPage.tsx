@@ -20,7 +20,7 @@ import { Box, Stack, Flex, Text } from '@/components/ui/primitives';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const STATUS_OPTIONS = ['PENDING', 'PENCIL', 'BOOKED', 'CANCELLED'];
+const STATUS_OPTIONS = ['PENDING', 'BOOKED', 'CANCELLED'];
 
 export function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();

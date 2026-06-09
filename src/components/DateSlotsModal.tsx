@@ -1,11 +1,21 @@
-import { useReducer } from 'react';
+import { useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pencil } from 'lucide-react';
+import { Pencil, ArrowLeft } from 'lucide-react';
 import dayjs from 'dayjs';
 import { useAppStore } from '@/store/useAppStore';
 import { useSlotsByDate } from '@/hooks/useSlots';
 import { ReserveForm } from '@/components/ReserveForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Slot } from '@/lib/queries';
@@ -43,7 +53,7 @@ type SlotState =
   | { kind: 'booked'; bookingDocId: string };
 
 function resolveSlotState(slots: Slot[], pool: string, slotType: 'DAY' | 'NIGHT'): SlotState {
-  const slot = slots.find((s) => s.pool === pool && s.type === slotType);
+  const slot = slots.find((s) => s.pool === pool && s.type === slotType && s.status !== 'CANCELLED');
   if (!slot) return { kind: 'empty' };
   if (slot.status === 'BOOKED') return { kind: 'booked', bookingDocId: slot.bookingDocId ?? '' };
   return { kind: 'pending', bookingDocId: slot.bookingDocId ?? '' };
@@ -62,8 +72,20 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
   const pools = useAppStore((s) => s.pools);
   const { data: slots = [] } = useSlotsByDate(date);
   const [state, dispatch] = useReducer(reducer, { view: 'table' });
+  const [showDiscard, setShowDiscard] = useState(false);
+  const [bookingMode, setBookingMode] = useState<'single' | 'multiple'>('single');
 
-  const handleClose = () => {
+  // Intercept close: if user is mid-form, show discard confirmation first
+  const handleAttemptClose = () => {
+    if (state.view === 'reserve') {
+      setShowDiscard(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmDiscard = () => {
+    setShowDiscard(false);
     dispatch({ type: 'back_to_table' });
     onClose();
   };
@@ -81,70 +103,132 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
     dispatch({ type: 'back_to_table' });
   };
 
+  const isReserveView = state.view === 'reserve';
+
   return (
     <>
-      {/* Main date slots dialog */}
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{dayjs(date).format('ddd, MMM DD YYYY')}</DialogTitle>
-          </DialogHeader>
+      <Dialog open={open} onOpenChange={handleAttemptClose}>
+        <DialogContent
+          className={
+            isReserveView
+              ? 'w-[95vw] sm:max-w-7xl max-h-[90vh] overflow-y-auto'
+              : 'sm:max-w-3xl max-h-[80vh] overflow-y-auto'
+          }
+        >
+          {/* ── Step 1: Pool grid ─────────────────────────────────────── */}
+          {state.view === 'table' && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <DialogTitle>{dayjs(date).format('ddd, MMM DD YYYY')}</DialogTitle>
+                  <div className="flex items-center gap-1 rounded-lg border p-1 text-sm">
+                    <Button
+                      variant={bookingMode === 'single' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 px-3"
+                      onClick={() => setBookingMode('single')}
+                    >
+                      Single
+                    </Button>
+                    <Button
+                      variant={bookingMode === 'multiple' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 px-3"
+                      onClick={() => setBookingMode('multiple')}
+                    >
+                      Multiple
+                    </Button>
+                  </div>
+                </div>
+              </DialogHeader>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pool</TableHead>
-                <TableHead className="text-center">Day</TableHead>
-                <TableHead className="text-center">Night</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pools.map((pool) => {
-                const dayState = resolveSlotState(slots, pool.pool, 'DAY');
-                const nightState = resolveSlotState(slots, pool.pool, 'NIGHT');
-                return (
-                  <TableRow key={pool.pool}>
-                    <TableCell className="font-medium">{pool.pool}</TableCell>
-                    <TableCell className="text-center">
-                      <SlotButton
-                        slotState={dayState}
-                        onAdd={() => handleAddClick(pool.pool, 'DAY')}
-                        onOpen={(id) => handleBookingClick(id)}
-                      />
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <SlotButton
-                        slotState={nightState}
-                        onAdd={() => handleAddClick(pool.pool, 'NIGHT')}
-                        onOpen={(id) => handleBookingClick(id)}
-                      />
-                    </TableCell>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Pool</TableHead>
+                    <TableHead className="text-center">Day</TableHead>
+                    <TableHead className="text-center">Night</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {pools.map((pool) => {
+                    const dayState = resolveSlotState(slots, pool.pool, 'DAY');
+                    const nightState = resolveSlotState(slots, pool.pool, 'NIGHT');
+                    return (
+                      <TableRow key={pool.pool}>
+                        <TableCell className="font-medium">{pool.pool}</TableCell>
+                        <TableCell className="text-center">
+                          <SlotButton
+                            slotState={dayState}
+                            onAdd={() => handleAddClick(pool.pool, 'DAY')}
+                            onOpen={(id) => handleBookingClick(id)}
+                          />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <SlotButton
+                            slotState={nightState}
+                            onAdd={() => handleAddClick(pool.pool, 'NIGHT')}
+                            onOpen={(id) => handleBookingClick(id)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </>
+          )}
+
+          {/* ── Step 2: Reservation form ──────────────────────────────── */}
+          {state.view === 'reserve' && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 px-2 -ml-1 text-muted-foreground hover:text-foreground"
+                    onClick={() => dispatch({ type: 'back_to_table' })}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <DialogTitle>
+                    New Reservation — {state.pool} · {state.slotType} · {state.date}
+                  </DialogTitle>
+                </div>
+              </DialogHeader>
+
+              <ReserveForm
+                defaultPool={state.pool}
+                defaultDate={state.date}
+                defaultSlotType={state.slotType}
+                hidePoolSelector={bookingMode === 'single'}
+                takenSlots={slots
+                  .filter((s) => s.status !== 'CANCELLED')
+                  .map((s) => ({ pool: s.pool, type: s.type }))}
+                onSuccess={handleReserveSuccess}
+              />
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
-      {/* Nested ReserveForm dialog */}
-      {state.view === 'reserve' && (
-        <Dialog open onOpenChange={() => dispatch({ type: 'back_to_table' })}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                New Reservation — {state.pool} · {state.slotType} · {state.date}
-              </DialogTitle>
-            </DialogHeader>
-            <ReserveForm
-              defaultPool={state.pool}
-              defaultDate={state.date}
-              defaultSlotType={state.slotType}
-              onSuccess={handleReserveSuccess}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Discard confirmation */}
+      <AlertDialog open={showDiscard} onOpenChange={setShowDiscard}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard reservation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Any details you've entered will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDiscard}>Discard</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

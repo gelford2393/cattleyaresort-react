@@ -55,6 +55,7 @@ export function useUpdateBookingStatus(bookingId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['slots'] });
     },
   });
 }
