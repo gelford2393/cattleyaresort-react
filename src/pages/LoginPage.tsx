@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +29,8 @@ export function LoginPage() {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       navigate('/calendar');
     } catch (e: unknown) {
-      setSubmitError((e as Error).message);
+      const err = e as FirebaseError | Error;
+      setSubmitError('code' in err && err.code ? `${err.code}: ${err.message}` : err.message);
     }
   });
 

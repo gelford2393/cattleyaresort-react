@@ -17,6 +17,14 @@ const firebaseConfig = {
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.warn('Firebase config missing required env vars', {
+    apiKey: !!firebaseConfig.apiKey,
+    authDomain: !!firebaseConfig.authDomain,
+    projectId: !!firebaseConfig.projectId,
+  });
+}
+
 const app = initializeApp(firebaseConfig);
 const analytics = typeof window !== 'undefined' ? getAnalytics(app) : undefined;
 const database = import.meta.env.VITE_FIREBASE_DATABASE_URL ? getDatabase(app) : undefined;
@@ -28,3 +36,4 @@ export const functions = getFunctions(app);
 export const firebaseDatabase = database;
 export const firebaseAnalytics = analytics;
 export default app;
+export { firebaseConfig };
