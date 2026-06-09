@@ -9,44 +9,44 @@ Extract all business logic out of page components into co-located custom hooks. 
 
 ## Folder Structure
 
-Each page with logic becomes a folder containing `index.tsx` (UI) and `usePageName.ts` (logic). Pages with no logic stay as flat files.
+Each page with logic becomes a folder containing `index.tsx` (UI) and `PageName.logic.ts` (logic). Pages with no logic stay as flat files.
 
 ```
 src/pages/
   BookingDetailPage/
     index.tsx
-    useBookingDetailPage.ts
+    BookingDetailPage.logic.ts
   BookingsPage/
     index.tsx
-    useBookingsPage.ts
+    BookingsPage.logic.ts
   BookingsSearchPage/
     index.tsx
-    useBookingsSearchPage.ts
+    BookingsSearchPage.logic.ts
   CalendarPage/
     index.tsx
-    useCalendarPage.ts
+    CalendarPage.logic.ts
   PaymentsPage/
     index.tsx
-    usePaymentsPage.ts
+    PaymentsPage.logic.ts
   PoolSlotPage/
     index.tsx
-    usePoolSlotPage.ts
+    PoolSlotPage.logic.ts
   ReservePage/
     index.tsx
-    useReservePage.ts
+    ReservePage.logic.ts
   SlotsPage/
     index.tsx
-    useSlotsPage.ts
+    SlotsPage.logic.ts
   LoginPage/
     index.tsx
-    useLoginPage.ts
+    LoginPage.logic.ts
   CalendarViewPage.tsx      ← stays flat (no logic)
   ReportsPage.tsx           ← stays flat (no logic)
 ```
 
 ## Logic Split Rule
 
-### Into the hook (`usePageName.ts`)
+### Into the hook (`PageName.logic.ts`)
 - `useForm`, `useWatch`
 - `useState` for data, loading, error, and UI flags
 - All Firestore reads and writes (getDocs, getDoc, addDoc, updateDoc, deleteDoc)
@@ -62,10 +62,10 @@ src/pages/
 
 ## Hook Return Pattern
 
-Every hook returns a flat object of values and handlers. The component destructures it at the top.
+The logic file exports a `use...` function (React's rules of hooks require the `use` prefix on any function that calls hooks internally). The file is named `PageName.logic.ts` for readability; the exported function still uses the `use` prefix.
 
 ```ts
-// useBookingsPage.ts
+// BookingsPage.logic.ts
 export function useBookingsPage() {
   // all logic here
   return {
