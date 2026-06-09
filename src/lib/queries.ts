@@ -34,7 +34,7 @@ export interface Booking {
 export interface Slot {
   id: string;
   pool: string;
-  type: string;
+  type: 'DAY' | 'NIGHT';
   date: string;
   status: string;
   bookingNo: string;
@@ -71,7 +71,7 @@ export async function fetchBookingSearch(q: string): Promise<Booking[]> {
       query(
         collection(firestore, 'bookings'),
         where('customer', '>=', q),
-        where('customer', '<=', q + '')
+        where('customer', '<=', q + '￿')
       )
     ),
     getDocs(
