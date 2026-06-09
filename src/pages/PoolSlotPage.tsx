@@ -1,44 +1,20 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
 import { useAppStore } from '@/store/useAppStore';
 import { CurrentMonth } from '@/components/CurrentMonth';
+import { useSlotsByMonth } from '@/hooks/useSlots';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { Box, Stack, Flex, Text } from '@/components/ui/primitives';
 
-interface SlotRecord { pool: string; type: string; date: string; status: string; bookingNo: string; }
-
 export function PoolSlotPage() {
   const [currentDate, setCurrentDate] = useState(dayjs());
-  const [slots, setSlots] = useState<SlotRecord[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const pools = useAppStore((s) => s.pools);
 
-  useEffect(() => {
-    let cancelled = false;
-    const fetchSlots = async () => {
-      setLoading(true);
-      setSlots([]);
-      setError('');
-      const startDate = currentDate.startOf('month').format('YYYY-MM-DD');
-      const endDate = currentDate.endOf('month').format('YYYY-MM-DD');
-      try {
-        const snap = await getDocs(
-          query(collection(firestore, 'slots'), where('date', '>=', startDate), where('date', '<=', endDate))
-        );
-        if (!cancelled) setSlots(snap.docs.map((d) => d.data() as SlotRecord));
-      } catch (e: unknown) {
-        if (!cancelled) setError((e as Error).message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    fetchSlots();
-    return () => { cancelled = true; };
-  }, [currentDate]);
+  const { data: slots = [], isLoading, isError, error } = useSlotsByMonth(
+    currentDate.year(),
+    currentDate.month() + 1
+  );
 
   const slotMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -60,7 +36,7 @@ export function PoolSlotPage() {
         <Text as="h1" size="xxl" weight="bold">Slots per Pool</Text>
         <Flex align="center" className="gap-3">
           <CurrentMonth value={currentDate} onChange={setCurrentDate} />
-          {loading && <Text as="span" size="small" color="muted">Loading...</Text>}
+          {isLoading && <Text as="span" size="small" color="muted">Loading...</Text>}
         </Flex>
       </Flex>
       <Flex className="text-xs gap-3 text-muted-foreground">
@@ -109,9 +85,9 @@ export function PoolSlotPage() {
           </tbody>
         </table>
       </Box>
-      {error && (
+      {isError && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{(error as Error).message}</AlertDescription>
         </Alert>
       )}
     </Stack>
