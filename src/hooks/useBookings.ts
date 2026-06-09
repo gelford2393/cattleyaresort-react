@@ -54,6 +54,7 @@ export function useUpdateBookingStatus(bookingId: string) {
     mutationFn: (status: string) => updateBookingStatus(bookingId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
 }
@@ -70,6 +71,7 @@ export function useUpdateBookingDiscounts(bookingId: string) {
     }) => updateBookingDiscounts(bookingId, discounts, total),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
 }
@@ -86,6 +88,7 @@ export function useUpdateBookingAdditionals(bookingId: string) {
     }) => updateBookingAdditionals(bookingId, additionals, total),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
 }
