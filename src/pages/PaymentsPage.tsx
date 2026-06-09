@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
+import { usePaymentsByDate } from '@/hooks/usePayments';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/DatePicker';
@@ -16,32 +15,18 @@ import { dateFilterSchema, type DateFilterInput } from '@/lib/form-schemas';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-interface PaymentRow { id: string; type: string; date: string; referenceNo: string; amount: number; bookingNo: string; }
-
 export function PaymentsPage() {
-  const [payments, setPayments] = useState<PaymentRow[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [searched, setSearched] = useState('');
+  const [submittedDate, setSubmittedDate] = useState('');
   const form = useForm<DateFilterInput>({
     resolver: zodResolver(dateFilterSchema),
     defaultValues: { date: '' },
   });
 
   const dateValue = useWatch({ control: form.control, name: 'date' });
+  const { data: payments = [], isLoading, isError, error } = usePaymentsByDate(submittedDate);
 
-  const onSubmit = form.handleSubmit(async ({ date }) => {
-    setLoading(true);
-    setError('');
-    setSearched(date);
-    try {
-      const snap = await getDocs(query(collection(firestore, 'payments'), where('date', '==', date)));
-      setPayments(snap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRow)));
-    } catch (e: unknown) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  const onSubmit = form.handleSubmit(({ date }) => {
+    setSubmittedDate(date);
   });
 
   const grandTotal = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -52,13 +37,13 @@ export function PaymentsPage() {
 
   const handlePrint = () => {
     const pdf = new jsPDF();
-    pdf.text(`Payments for ${searched}`, 14, 20);
+    pdf.text(`Payments for ${submittedDate}`, 14, 20);
     autoTable(pdf, {
       startY: 30,
       head: [['Type', 'Date', 'Reference', 'Booking No', 'Amount']],
       body: payments.map((p) => [p.type, p.date, p.referenceNo, p.bookingNo, `₱${p.amount.toLocaleString()}`]),
     });
-    pdf.save(`payments-${searched}.pdf`);
+    pdf.save(`payments-${submittedDate}.pdf`);
   };
 
   return (
@@ -68,14 +53,14 @@ export function PaymentsPage() {
         <Flex align="end" className="gap-3">
           <Stack gap="s-2">
             <Label>Date</Label>
-            <DatePicker 
+            <DatePicker
               value={dateValue}
               onChange={(date) => form.setValue('date', date, { shouldValidate: true })}
               placeholder="Select date"
             />
             <FormError message={form.formState.errors.date?.message} />
           </Stack>
-          <Button type="submit" disabled={loading}>Search</Button>
+          <Button type="submit" disabled={isLoading}>Search</Button>
           {payments.length > 0 && <Button type="button" variant="outline" onClick={handlePrint}>Print PDF</Button>}
         </Flex>
       </form>
@@ -116,12 +101,12 @@ export function PaymentsPage() {
           </TableBody>
         </Table>
       )}
-      {payments.length === 0 && searched && !loading && (
-        <Text size="small" color="muted" className="text-center py-8">No payments found for {searched}</Text>
+      {payments.length === 0 && submittedDate && !isLoading && (
+        <Text size="small" color="muted" className="text-center py-8">No payments found for {submittedDate}</Text>
       )}
-      {error && (
+      {isError && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{(error as Error).message}</AlertDescription>
         </Alert>
       )}
     </Stack>
