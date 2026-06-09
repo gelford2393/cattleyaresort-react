@@ -31,7 +31,7 @@ export interface CreatePaymentInput {
 }
 
 export async function createBooking(input: CreateBookingInput): Promise<string> {
-  const bookingNo = `CR-${Date.now()}`;
+  const bookingNo = `CR-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const user = auth.currentUser;
   const bookingRef = await addDoc(collection(firestore, 'bookings'), {
     bookingNo,
@@ -95,12 +95,12 @@ export async function createPayment(input: CreatePaymentInput): Promise<void> {
 }
 
 export async function deleteBookingCascade(id: string, bookingNo: string): Promise<void> {
-  await deleteDoc(doc(firestore, 'bookings', id));
   const [slotsSnap, paymentsSnap] = await Promise.all([
     getDocs(query(collection(firestore, 'slots'), where('bookingNo', '==', bookingNo))),
-    getDocs(query(collection(firestore, 'payments'), where('bookingNo', '==', bookingNo))),
+    getDocs(query(collection(firestore, 'payments'), where('bookingDocId', '==', id))),
   ]);
   await Promise.all([
+    deleteDoc(doc(firestore, 'bookings', id)),
     ...slotsSnap.docs.map((d) => deleteDoc(d.ref)),
     ...paymentsSnap.docs.map((d) => deleteDoc(d.ref)),
   ]);
