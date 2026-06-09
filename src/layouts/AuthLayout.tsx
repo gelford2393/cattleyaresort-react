@@ -1,9 +1,10 @@
 import { Outlet } from 'react-router-dom';
+import { Flex } from '@/components/ui/primitives';
 
 export function AuthLayout() {
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center">
+    <Flex align="center" justify="center" className="min-h-screen bg-muted">
       <Outlet />
-    </div>
+    </Flex>
   );
 }

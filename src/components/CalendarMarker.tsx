@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { firestore } from '@/lib/firebase';
+import { Flex } from '@/components/ui/primitives';
 
 interface SlotEntry { pool: string; type: string; bookingNo: string; status: string; }
 interface Props { date: string; }
@@ -28,10 +29,10 @@ export function CalendarMarker({ date }: Props) {
 
   return (
     <>
-      <div className="flex gap-1 flex-wrap cursor-pointer" onClick={() => setOpen(true)}>
+      <Flex wrap="wrap" className="gap-1 cursor-pointer" onClick={() => setOpen(true)}>
         <Badge variant={slotVariant(dayCount)} className="text-xs">D:{dayCount}</Badge>
         <Badge variant={slotVariant(nightCount)} className="text-xs">N:{nightCount}</Badge>
-      </div>
+      </Flex>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Slots for {date}</DialogTitle></DialogHeader>

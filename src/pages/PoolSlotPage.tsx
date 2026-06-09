@@ -6,6 +6,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { CurrentMonth } from '@/components/CurrentMonth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
+import { Box, Stack, Flex, Text } from '@/components/ui/primitives';
 
 interface SlotRecord { pool: string; type: string; date: string; status: string; bookingNo: string; }
 
@@ -54,19 +55,19 @@ export function PoolSlotPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold">Slots per Pool</h1>
-        <div className="flex items-center gap-3">
+    <Stack gap="s0">
+      <Flex align="center" justify="between" wrap="wrap" gap="s-1">
+        <Text as="h1" size="xxl" weight="bold">Slots per Pool</Text>
+        <Flex align="center" className="gap-3">
           <CurrentMonth value={currentDate} onChange={setCurrentDate} />
-          {loading && <span className="text-sm text-muted-foreground">Loading...</span>}
-        </div>
-      </div>
-      <div className="text-xs flex gap-3 text-muted-foreground">
+          {loading && <Text as="span" size="small" color="muted">Loading...</Text>}
+        </Flex>
+      </Flex>
+      <Flex className="text-xs gap-3 text-muted-foreground">
         <span><span className="inline-block w-3 h-3 rounded bg-yellow-200 mr-1"></span>Unpaid (PENDING/PENCIL)</span>
         <span><span className="inline-block w-3 h-3 rounded bg-red-200 mr-1"></span>Paid (BOOKED)</span>
-      </div>
-      <div className="overflow-x-auto">
+      </Flex>
+      <Box className="overflow-x-auto">
         <table className="text-xs border-collapse w-full">
           <thead>
             <tr>
@@ -107,12 +108,12 @@ export function PoolSlotPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </Box>
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-    </div>
+    </Stack>
   );
 }

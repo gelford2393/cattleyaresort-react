@@ -9,6 +9,7 @@ import { CurrentMonth } from '@/components/CurrentMonth';
 import { CalendarMarker } from '@/components/CalendarMarker';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
+import { Box, Stack, Text } from '@/components/ui/primitives';
 import '@fullcalendar/common/main.css';
 
 export function CalendarPage() {
@@ -50,16 +51,16 @@ export function CalendarPage() {
   }, [currentDate]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Calendar</h1>
-          <p className="text-sm text-muted-foreground">Monthly booking overview with slot counts on each day.</p>
-        </div>
+    <Stack gap="s0">
+      <Stack gap="s0" className="md:flex-row md:items-center md:justify-between">
+        <Box>
+          <Text as="h1" size="xxl" weight="bold">Calendar</Text>
+          <Text size="small" color="muted">Monthly booking overview with slot counts on each day.</Text>
+        </Box>
         <CurrentMonth value={currentDate} onChange={setCurrentDate} />
-      </div>
+      </Stack>
 
-      <div className="rounded-lg border bg-card p-4">
+      <Box className="rounded-lg border bg-card p-4">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin, listPlugin]}
           initialView="dayGridMonth"
@@ -72,14 +73,14 @@ export function CalendarPage() {
           dayMaxEvents={true}
           initialDate={currentDate.format('YYYY-MM-DD')}
         />
-      </div>
+      </Box>
 
       {selectedDate && (
-        <div className="rounded-lg border bg-card p-4">
-          <h2 className="text-lg font-semibold mb-4">Details for {dayjs(selectedDate).format('MMMM D, YYYY')}</h2>
+        <Box className="rounded-lg border bg-card p-4">
+          <Text as="h2" size="large" weight="semibold" className="mb-4">Details for {dayjs(selectedDate).format('MMMM D, YYYY')}</Text>
           <CalendarMarker date={selectedDate} />
-        </div>
+        </Box>
       )}
-    </div>
+    </Stack>
   );
 }

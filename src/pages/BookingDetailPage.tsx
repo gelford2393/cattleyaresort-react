@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AdditionalAdd } from '@/components/AdditionalAdd';
 import { DiscountAdd } from '@/components/DiscountAdd';
 import { PaymentAdd } from '@/components/PaymentAdd';
+import { Box, Stack, Flex, Text } from '@/components/ui/primitives';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -126,16 +127,16 @@ export function BookingDetailPage() {
     pdf.save(`${booking.bookingNo}.pdf`);
   };
 
-  if (!booking) return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+  if (!booking) return <Box className="p-8 text-center text-muted-foreground">Loading...</Box>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-2xl font-bold">{booking.bookingNo}</h1>
-          <p className="text-muted-foreground">{booking.customer} · {booking.bookingDate}</p>
-        </div>
-        <div className="flex items-center gap-2">
+    <Stack gap="s1">
+      <Flex align="center" justify="between" wrap="wrap" gap="s-1">
+        <Box>
+          <Text as="h1" size="xxl" weight="bold">{booking.bookingNo}</Text>
+          <Text color="muted">{booking.customer} · {booking.bookingDate}</Text>
+        </Box>
+        <Flex align="center" gap="s-1">
           <Select value={booking.status} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -143,8 +144,8 @@ export function BookingDetailPage() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={handlePrint}>Print PDF</Button>
-        </div>
-      </div>
+        </Flex>
+      </Flex>
 
       {/* Slots */}
       <Card>
@@ -164,7 +165,7 @@ export function BookingDetailPage() {
               ))}
             </TableBody>
           </Table>
-          <div className="text-right mt-2 font-semibold">Subtotal: ₱{booking.subTotal.toLocaleString()}</div>
+          <Box className="text-right mt-2 font-semibold">Subtotal: ₱{booking.subTotal.toLocaleString()}</Box>
         </CardContent>
       </Card>
 
@@ -176,7 +177,7 @@ export function BookingDetailPage() {
         </CardHeader>
         <CardContent>
           {(booking.discounts ?? []).length === 0
-            ? <p className="text-sm text-muted-foreground">No discounts</p>
+            ? <Text size="small" color="muted">No discounts</Text>
             : <Table>
                 <TableHeader><TableRow>
                   <TableHead>Care of By</TableHead><TableHead>Reason</TableHead><TableHead>Amount</TableHead>
@@ -203,7 +204,7 @@ export function BookingDetailPage() {
         </CardHeader>
         <CardContent>
           {(booking.additionals ?? []).length === 0
-            ? <p className="text-sm text-muted-foreground">No additional charges</p>
+            ? <Text size="small" color="muted">No additional charges</Text>
             : <Table>
                 <TableHeader><TableRow>
                   <TableHead>Description</TableHead><TableHead>Amount</TableHead>
@@ -229,7 +230,7 @@ export function BookingDetailPage() {
         </CardHeader>
         <CardContent>
           {payments.length === 0
-            ? <p className="text-sm text-muted-foreground">No payments</p>
+            ? <Text size="small" color="muted">No payments</Text>
             : <Table>
                 <TableHeader><TableRow>
                   <TableHead>Type</TableHead><TableHead>Date</TableHead><TableHead>Reference</TableHead><TableHead>Amount</TableHead>
@@ -246,11 +247,11 @@ export function BookingDetailPage() {
                 </TableBody>
               </Table>
           }
-          <div className="mt-2 space-y-1 text-sm text-right">
-            <div>Total: <strong>₱{booking.total.toLocaleString()}</strong></div>
-            <div>Paid: <strong>₱{totalPayments.toLocaleString()}</strong></div>
-            <div>Balance: <strong className={balance > 0 ? 'text-red-500' : 'text-green-600'}>₱{balance.toLocaleString()}</strong></div>
-          </div>
+          <Stack className="mt-2 space-y-1 text-sm text-right">
+            <Box>Total: <strong>₱{booking.total.toLocaleString()}</strong></Box>
+            <Box>Paid: <strong>₱{totalPayments.toLocaleString()}</strong></Box>
+            <Box>Balance: <strong className={balance > 0 ? 'text-red-500' : 'text-green-600'}>₱{balance.toLocaleString()}</strong></Box>
+          </Stack>
         </CardContent>
       </Card>
 
@@ -258,6 +259,6 @@ export function BookingDetailPage() {
       <AdditionalAdd open={showAdditional} onClose={() => setShowAdditional(false)} onSave={handleAddAdditional} />
       <DiscountAdd open={showDiscount} onClose={() => setShowDiscount(false)} onSave={handleAddDiscount} />
       <PaymentAdd open={showPayment} onClose={() => setShowPayment(false)} onSave={handleAddPayment} />
-    </div>
+    </Stack>
   );
 }

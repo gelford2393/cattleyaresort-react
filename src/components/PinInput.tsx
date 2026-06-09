@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Flex } from '@/components/ui/primitives';
 
 interface Props { onComplete: (pin: string) => void; }
 
@@ -24,7 +25,7 @@ export function PinInput({ onComplete }: Props) {
   };
 
   return (
-    <div className="flex gap-2">
+    <Flex gap="s-1">
       {digits.map((digit, i) => (
         <Input
           key={i}
@@ -37,6 +38,6 @@ export function PinInput({ onComplete }: Props) {
           autoFocus={i === 0}
         />
       ))}
-    </div>
+    </Flex>
   );
 }

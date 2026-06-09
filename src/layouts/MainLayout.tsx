@@ -6,6 +6,7 @@ import { signOut } from 'firebase/auth';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Box } from '@/components/ui/primitives';
 import { auth } from '@/lib/firebase';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,7 +36,7 @@ export function MainLayout() {
   const visibleMenus = menus.filter((m) => !m.restricted || isAdmin);
 
   return (
-    <div className="min-h-screen bg-background">
+    <Box className="min-h-screen bg-background">
       {/* Top bar */}
       <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-primary px-4 text-primary-foreground">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => setOpen(true)}>
@@ -77,6 +78,6 @@ export function MainLayout() {
       <main className="p-4 max-w-5xl mx-auto">
         <Outlet />
       </main>
-    </div>
+    </Box>
   );
 }
