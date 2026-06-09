@@ -1,5 +1,6 @@
 import { useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Pencil } from 'lucide-react';
 import dayjs from 'dayjs';
 import { useAppStore } from '@/store/useAppStore';
 import { useSlotsByDate } from '@/hooks/useSlots';
@@ -76,6 +77,7 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
   };
 
   const handleBookingClick = (bookingDocId: string) => {
+    if (!bookingDocId) return;
     navigate(`/booking/${bookingDocId}`, { state: { modal: true } });
   };
 
@@ -164,7 +166,7 @@ function SlotButton({ slotState, onAdd, onOpen }: SlotButtonProps) {
     return (
       <Button
         size="sm"
-        className="w-20 bg-green-600 hover:bg-green-700 text-white"
+        className="w-20 bg-success hover:bg-success/90 text-success-foreground"
         onClick={onAdd}
       >
         ADD
@@ -175,10 +177,10 @@ function SlotButton({ slotState, onAdd, onOpen }: SlotButtonProps) {
     return (
       <Button
         size="sm"
-        className="w-20 bg-yellow-500 hover:bg-yellow-600 text-white"
+        className="w-20 bg-warning hover:bg-warning/90 text-warning-foreground"
         onClick={() => onOpen(slotState.bookingDocId)}
       >
-        ✏️
+        <Pencil className="h-4 w-4" />
       </Button>
     );
   }
@@ -186,7 +188,7 @@ function SlotButton({ slotState, onAdd, onOpen }: SlotButtonProps) {
     return (
       <Button
         size="sm"
-        className="w-20 bg-red-600 hover:bg-red-700 text-white"
+        className="w-20 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
         onClick={() => onOpen(slotState.bookingDocId)}
       >
         BOOKED
