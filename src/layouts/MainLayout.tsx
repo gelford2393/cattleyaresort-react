@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
   Menu, LogOut, CalendarDays, BookOpen, CalendarCheck,
   Waves, List, Search, CreditCard, BarChart2, Circle,
+  Moon, Sun,
   type LucideIcon,
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
@@ -21,7 +22,13 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 export function MainLayout() {
   const [open, setOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
   const menus = useAppStore((s) => s.menus);
   const { isAdmin } = useAuth();
 
@@ -40,6 +47,9 @@ export function MainLayout() {
         </Button>
         <img src="/cattleyaresortlogo.png" alt="logo" className="h-8 object-contain" />
         <span className="flex-1 font-semibold text-sm">Cattleya Resort</span>
+        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => setIsDark((prev) => !prev)}>
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </Button>
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={handleLogout}>
           <LogOut className="h-5 w-5" />
         </Button>
