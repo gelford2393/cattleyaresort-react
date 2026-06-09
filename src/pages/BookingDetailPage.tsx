@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
   useBookingDetail,
   useUpdateBookingStatus,
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AdditionalAdd } from '@/components/AdditionalAdd';
 import { DiscountAdd } from '@/components/DiscountAdd';
 import { PaymentAdd } from '@/components/PaymentAdd';
@@ -23,6 +24,9 @@ const STATUS_OPTIONS = ['PENDING', 'PENCIL', 'BOOKED', 'CANCELLED'];
 
 export function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isModal = location.state?.modal === true;
   const [showAdditional, setShowAdditional] = useState(false);
   const [showDiscount, setShowDiscount] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
@@ -98,7 +102,7 @@ export function BookingDetailPage() {
     pdf.save(`${booking.bookingNo}.pdf`);
   };
 
-  return (
+  const content = (
     <Stack gap="s1">
       <Flex align="center" justify="between" wrap="wrap" gap="s-1">
         <Box>
@@ -231,4 +235,19 @@ export function BookingDetailPage() {
       <PaymentAdd open={showPayment} onClose={() => setShowPayment(false)} onSave={handleAddPayment} />
     </Stack>
   );
+
+  if (isModal) {
+    return (
+      <Dialog open onOpenChange={() => navigate(-1)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{booking.bookingNo} — {booking.customer}</DialogTitle>
+          </DialogHeader>
+          {content}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return content;
 }
