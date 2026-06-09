@@ -1,4 +1,4 @@
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -20,7 +20,7 @@ export function DiscountAdd({ open, onClose, onSave }: Props) {
     resolver: zodResolver(discountSchema),
     defaultValues: { careOfBy: undefined, others: '', amount: undefined },
   });
-  const careOfBy = form.watch('careOfBy');
+  const careOfBy = useWatch({ control: form.control, name: 'careOfBy' });
 
   const close = () => { form.reset(); onClose(); };
 

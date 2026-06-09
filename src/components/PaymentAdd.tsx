@@ -1,7 +1,5 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { IMaskInput } from 'react-imask';
 import type { z } from 'zod';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Stack } from '@/components/ui/primitives';
 import { FormError } from '@/components/FormError';
+import { DatePicker } from '@/components/DatePicker';
 import { paymentSchema, type PaymentInput, PAYMENT_TYPES } from '@/lib/form-schemas';
 
 type PaymentFormInput = z.input<typeof paymentSchema>;
@@ -17,26 +16,12 @@ type PaymentFormInput = z.input<typeof paymentSchema>;
 interface Payment { type: string; date: string; referenceNo: string; amount: number; }
 interface Props { open: boolean; onClose: () => void; onSave: (p: Payment) => void; }
 
-const DateMaskInput = React.forwardRef<
-  HTMLInputElement,
-  { value?: string; onChange: (value: string) => void }
->(({ value, onChange }, ref) => (
-  <IMaskInput
-    value={value}
-    mask={'0000-00-00 00:00:00' as unknown as RegExp}
-    inputRef={ref}
-    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-    onAccept={(v: string) => onChange(v)}
-  />
-));
-DateMaskInput.displayName = 'DateMaskInput';
-
 export function PaymentAdd({ open, onClose, onSave }: Props) {
   const form = useForm<PaymentFormInput, unknown, PaymentInput>({
     resolver: zodResolver(paymentSchema),
     defaultValues: { type: undefined, date: '', referenceNo: '', amount: undefined },
   });
-  const type = form.watch('type');
+  const type = useWatch({ control: form.control, name: 'type' });
 
   const close = () => { form.reset(); onClose(); };
 
@@ -73,15 +58,17 @@ export function PaymentAdd({ open, onClose, onSave }: Props) {
               <FormError message={form.formState.errors.type?.message} />
             </Stack>
             <Stack gap="s-2">
-              <Label>{type === 'Bank Deposit' ? 'Deposit Date (YYYY-MM-DD HH:MM:SS)' : 'Date'}</Label>
+              <Label>{type === 'Bank Deposit' ? 'Deposit Date' : 'Date'}</Label>
               <Controller
                 control={form.control}
                 name="date"
-                render={({ field }) =>
-                  type === 'Bank Deposit'
-                    ? <DateMaskInput value={field.value} onChange={field.onChange} />
-                    : <Input value={field.value ?? ''} onChange={field.onChange} />
-                }
+                render={({ field }) => (
+                  <DatePicker
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder={type === 'Bank Deposit' ? 'Select deposit date' : 'Select date'}
+                  />
+                )}
               />
               <FormError message={form.formState.errors.date?.message} />
             </Stack>

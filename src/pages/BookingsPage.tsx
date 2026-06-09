@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { firestore } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/DatePicker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Stack, Flex, Text } from '@/components/ui/primitives';
@@ -29,6 +29,8 @@ export function BookingsPage() {
     resolver: zodResolver(dateFilterSchema),
     defaultValues: { date: '' },
   });
+
+  const dateValue = useWatch({ control: form.control, name: 'date' });
 
   const onSubmit = form.handleSubmit(async ({ date }) => {
     setLoading(true);
@@ -59,7 +61,11 @@ export function BookingsPage() {
         <Flex align="end" className="gap-3">
           <Stack gap="s-2">
             <Label>Date</Label>
-            <Input type="date" {...form.register('date')} className="w-44" />
+            <DatePicker 
+              value={dateValue}
+              onChange={(date) => form.setValue('date', date, { shouldValidate: true })}
+              placeholder="Select date"
+            />
             <FormError message={form.formState.errors.date?.message} />
           </Stack>
           <Button type="submit" disabled={loading}>Search</Button>
