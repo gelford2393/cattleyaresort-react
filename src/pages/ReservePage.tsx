@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { firestore, auth } from '@/lib/firebase';
 import { useAppStore } from '@/store/useAppStore';
+import { useCreateBooking } from '@/hooks/useBookings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,7 +17,7 @@ import { reserveSchema, type ReserveInput, type SlotInput } from '@/lib/form-sch
 export function ReservePage() {
   const navigate = useNavigate();
   const pools = useAppStore((s) => s.pools);
-  const [submitError, setSubmitError] = useState('');
+  const createBooking = useCreateBooking();
 
   const form = useForm<ReserveInput>({
     resolver: zodResolver(reserveSchema),
@@ -42,43 +40,11 @@ export function ReservePage() {
 
   const subTotal = selectedSlots.reduce((sum, s) => sum + s.rate, 0);
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    setSubmitError('');
-    // eslint-disable-next-line react-hooks/purity
-    const bookingNo = `CR-${Date.now()}`;
-    try {
-      const user = auth.currentUser;
-      const bookingRef = await addDoc(collection(firestore, 'bookings'), {
-        bookingNo,
-        bookingDate: values.bookingDate,
-        customer: values.customer,
-        email: values.email,
-        phone: values.phone,
-        slots: values.slots,
-        subTotal,
-        discount: 0,
-        total: subTotal,
-        reserveFee: 0,
-        status: 'PENDING',
-        createdBy: user?.email ?? '',
-        createdAt: Timestamp.now(),
-      });
-      await Promise.all(
-        values.slots.map((slot) =>
-          addDoc(collection(firestore, 'slots'), {
-            bookingNo,
-            bookingDocId: bookingRef.id,
-            pool: slot.pool,
-            type: slot.type,
-            date: values.bookingDate,
-            status: 'PENDING',
-          }),
-        ),
-      );
-      navigate(`/booking/${bookingRef.id}`);
-    } catch (e: unknown) {
-      setSubmitError((e as Error).message);
-    }
+  const onSubmit = form.handleSubmit((values) => {
+    createBooking.mutate(
+      { ...values, subTotal },
+      { onSuccess: (id) => navigate(`/booking/${id}`) }
+    );
   });
 
   return (
@@ -86,10 +52,7 @@ export function ReservePage() {
       <Stack gap="s1">
         <Text as="h1" size="xxl" weight="bold">Reserve</Text>
 
-        {/* Two-column layout: Pools (left) + Form (right) */}
         <div className="grid lg:grid-cols-[1fr_400px] gap-[var(--s1)]">
-          
-          {/* LEFT: Pool selector (scrollable) */}
           <Box>
             <Text size="large" weight="semibold" className="mb-3">Select Pools</Text>
             <div className="max-h-[600px] overflow-y-auto pr-2">
@@ -124,10 +87,7 @@ export function ReservePage() {
             <FormError message={form.formState.errors.slots?.message} />
           </Box>
 
-          {/* RIGHT: Sticky form + summary */}
           <div className="lg:sticky lg:top-[var(--s1)] lg:h-fit space-y-[var(--s0)]">
-            
-            {/* Summary section */}
             {selectedSlots.length > 0 && (
               <Card className="border-green-200 bg-green-50">
                 <CardContent className="pt-4">
@@ -152,7 +112,6 @@ export function ReservePage() {
               </Card>
             )}
 
-            {/* Booking form */}
             <Card>
               <CardHeader><CardTitle>Booking Details</CardTitle></CardHeader>
               <CardContent className="space-y-[var(--s0)]">
@@ -173,7 +132,7 @@ export function ReservePage() {
                 </Stack>
                 <Stack gap="s-2">
                   <Label>Booking Date *</Label>
-                  <DatePicker 
+                  <DatePicker
                     value={bookingDateValue}
                     onChange={(date) => form.setValue('bookingDate', date, { shouldValidate: true })}
                     placeholder="Select booking date"
@@ -183,18 +142,18 @@ export function ReservePage() {
               </CardContent>
             </Card>
 
-            {submitError && (
+            {createBooking.isError && (
               <Alert variant="destructive">
-                <AlertDescription>{submitError}</AlertDescription>
+                <AlertDescription>{(createBooking.error as Error).message}</AlertDescription>
               </Alert>
             )}
 
-            <Button 
-              type="submit" 
-              disabled={form.formState.isSubmitting || selectedSlots.length === 0} 
+            <Button
+              type="submit"
+              disabled={createBooking.isPending || selectedSlots.length === 0}
               className="w-full"
             >
-              {form.formState.isSubmitting ? 'Reserving...' : 'Complete Reservation'}
+              {createBooking.isPending ? 'Reserving...' : 'Complete Reservation'}
             </Button>
           </div>
         </div>
