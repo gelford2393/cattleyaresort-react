@@ -1,55 +1,74 @@
-import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { z } from 'zod';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Stack } from '@/components/ui/primitives';
+import { FormError } from '@/components/FormError';
+import { discountSchema, type DiscountInput, CARE_OF_OPTIONS } from '@/lib/form-schemas';
 
-const CARE_OF_OPTIONS = ['Mr. Benito', 'Mrs. Benito', 'Others'];
+type DiscountFormInput = z.input<typeof discountSchema>;
 
 interface Discount { careOfBy: string; others: string; amount: number; }
 interface Props { open: boolean; onClose: () => void; onSave: (d: Discount) => void; }
 
 export function DiscountAdd({ open, onClose, onSave }: Props) {
-  const [careOfBy, setCareOfBy] = useState('');
-  const [others, setOthers] = useState('');
-  const [amount, setAmount] = useState('');
+  const form = useForm<DiscountFormInput, unknown, DiscountInput>({
+    resolver: zodResolver(discountSchema),
+    defaultValues: { careOfBy: undefined, others: '', amount: undefined },
+  });
+  const careOfBy = form.watch('careOfBy');
 
-  const handleSave = () => {
-    if (!careOfBy || !amount) return;
-    onSave({ careOfBy, others, amount: parseFloat(amount) });
-    setCareOfBy(''); setOthers(''); setAmount('');
-  };
+  const close = () => { form.reset(); onClose(); };
+
+  const onSubmit = form.handleSubmit((values) => {
+    onSave({ careOfBy: values.careOfBy, others: values.others ?? '', amount: values.amount });
+    form.reset();
+  });
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={(v) => !v && close()}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader><DialogTitle>Add Discount</DialogTitle></DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label>Care of By</Label>
-            <Select value={careOfBy} onValueChange={setCareOfBy}>
-              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-              <SelectContent>
-                {CARE_OF_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          {careOfBy === 'Others' && (
-            <div className="flex flex-col gap-1.5">
-              <Label>Reason</Label>
-              <Input value={others} onChange={(e) => setOthers(e.target.value)} />
-            </div>
-          )}
-          <div className="flex flex-col gap-1.5">
-            <Label>Amount</Label>
-            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
-          <Button onClick={handleSave}>Save</Button>
-        </DialogFooter>
+        <form onSubmit={onSubmit}>
+          <Stack gap="s0">
+            <Stack gap="s-2">
+              <Label>Care of By</Label>
+              <Controller
+                control={form.control}
+                name="careOfBy"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      {CARE_OF_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <FormError message={form.formState.errors.careOfBy?.message} />
+            </Stack>
+            {careOfBy === 'Others' && (
+              <Stack gap="s-2">
+                <Label>Reason</Label>
+                <Input {...form.register('others')} />
+                <FormError message={form.formState.errors.others?.message} />
+              </Stack>
+            )}
+            <Stack gap="s-2">
+              <Label>Amount</Label>
+              <Input type="number" {...form.register('amount')} />
+              <FormError message={form.formState.errors.amount?.message} />
+            </Stack>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={close}>Close</Button>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </Stack>
+        </form>
       </DialogContent>
     </Dialog>
   );
