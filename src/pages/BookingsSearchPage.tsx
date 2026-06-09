@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { firestore } from '@/lib/firebase';
@@ -11,26 +13,33 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Stack, Flex, Text } from '@/components/ui/primitives';
+import { FormError } from '@/components/FormError';
+import { searchSchema, type SearchInput } from '@/lib/form-schemas';
 
 interface BookingRow { id: string; bookingNo: string; customer: string; total: number; status: string; bookingDate: string; }
 
 export function BookingsSearchPage() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
   const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<BookingRow | null>(null);
+  const form = useForm<SearchInput>({
+    resolver: zodResolver(searchSchema),
+    defaultValues: { query: '' },
+  });
 
-  const handleSearch = async () => {
-    if (!search.trim()) return;
+  const onSubmit = form.handleSubmit(async ({ query: q }) => {
     setLoading(true);
-    const byName = await getDocs(query(collection(firestore, 'bookings'), where('customer', '>=', search), where('customer', '<=', search + '')));
-    const byNo = await getDocs(query(collection(firestore, 'bookings'), where('bookingNo', '==', search)));
+    setSearched(true);
+    const byName = await getDocs(query(collection(firestore, 'bookings'), where('customer', '>=', q), where('customer', '<=', q + '')));
+    const byNo = await getDocs(query(collection(firestore, 'bookings'), where('bookingNo', '==', q)));
     const combined = new Map<string, BookingRow>();
     [...byName.docs, ...byNo.docs].forEach((d) => combined.set(d.id, { id: d.id, ...d.data() } as BookingRow));
     setBookings([...combined.values()]);
     setLoading(false);
-  };
+  });
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -47,15 +56,18 @@ export function BookingsSearchPage() {
     s === 'BOOKED' ? 'default' : s === 'CANCELLED' ? 'destructive' : 'secondary';
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Search Bookings</h1>
-      <div className="flex items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label>Customer Name or Booking No.</Label>
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} className="w-72" />
-        </div>
-        <Button onClick={handleSearch} disabled={loading || !search.trim()}>Search</Button>
-      </div>
+    <Stack gap="s0">
+      <Text as="h1" size="xxl" weight="bold">Search Bookings</Text>
+      <form onSubmit={onSubmit}>
+        <Flex align="end" className="gap-3">
+          <Stack gap="s-2">
+            <Label>Customer Name or Booking No.</Label>
+            <Input {...form.register('query')} className="w-72" />
+            <FormError message={form.formState.errors.query?.message} />
+          </Stack>
+          <Button type="submit" disabled={loading}>Search</Button>
+        </Flex>
+      </form>
       {bookings.length > 0 && (
         <Table>
           <TableHeader>
@@ -80,8 +92,8 @@ export function BookingsSearchPage() {
           </TableBody>
         </Table>
       )}
-      {bookings.length === 0 && search && !loading && (
-        <p className="text-sm text-muted-foreground text-center py-8">No bookings found</p>
+      {bookings.length === 0 && searched && !loading && (
+        <Text size="small" color="muted" className="text-center py-8">No bookings found</Text>
       )}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
@@ -100,6 +112,6 @@ export function BookingsSearchPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Stack>
   );
 }

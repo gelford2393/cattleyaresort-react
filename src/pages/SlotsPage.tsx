@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { firestore } from '@/lib/firebase';
@@ -7,20 +9,27 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Stack, Flex, Text } from '@/components/ui/primitives';
+import { FormError } from '@/components/FormError';
+import { dateFilterSchema, type DateFilterInput } from '@/lib/form-schemas';
 
 interface SlotRow { id: string; pool: string; type: string; bookingNo: string; bookingDocId?: string; status: string; }
 
 export function SlotsPage() {
   const navigate = useNavigate();
-  const [date, setDate] = useState('');
   const [slots, setSlots] = useState<SlotRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searched, setSearched] = useState('');
+  const form = useForm<DateFilterInput>({
+    resolver: zodResolver(dateFilterSchema),
+    defaultValues: { date: '' },
+  });
 
-  const loadSlots = async () => {
-    if (!date) return;
+  const onSubmit = form.handleSubmit(async ({ date }) => {
     setLoading(true);
     setError('');
+    setSearched(date);
     try {
       const snap = await getDocs(query(collection(firestore, 'slots'), where('date', '==', date)));
       setSlots(snap.docs.map((d) => ({ id: d.id, ...d.data() } as SlotRow)));
@@ -29,18 +38,21 @@ export function SlotsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Slots</h1>
-      <div className="flex items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label>Date</Label>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-44" />
-        </div>
-        <Button onClick={loadSlots} disabled={loading || !date}>Search</Button>
-      </div>
+    <Stack gap="s0">
+      <Text as="h1" size="xxl" weight="bold">Slots</Text>
+      <form onSubmit={onSubmit}>
+        <Flex align="end" className="gap-3">
+          <Stack gap="s-2">
+            <Label>Date</Label>
+            <Input type="date" {...form.register('date')} className="w-44" />
+            <FormError message={form.formState.errors.date?.message} />
+          </Stack>
+          <Button type="submit" disabled={loading}>Search</Button>
+        </Flex>
+      </form>
       {slots.length > 0 && (
         <Table>
           <TableHeader>
@@ -60,14 +72,14 @@ export function SlotsPage() {
           </TableBody>
         </Table>
       )}
-      {slots.length === 0 && date && !loading && (
-        <p className="text-sm text-muted-foreground text-center py-8">No slots found for {date}</p>
+      {slots.length === 0 && searched && !loading && (
+        <Text size="small" color="muted" className="text-center py-8">No slots found for {searched}</Text>
       )}
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-    </div>
+    </Stack>
   );
 }
