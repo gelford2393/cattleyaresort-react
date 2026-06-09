@@ -6,7 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { CurrentMonth } from '@/components/CurrentMonth';
-import { CalendarMarker } from '@/components/CalendarMarker';
+import { DateSlotsModal } from '@/components/DateSlotsModal';
 import { useSlotsByMonth } from '@/hooks/useSlots';
 import { Box, Stack, Text } from '@/components/ui/primitives';
 import '@fullcalendar/common/main.css';
@@ -63,14 +63,11 @@ export function CalendarPage() {
         />
       </Box>
 
-      {selectedDate && (
-        <Box className="rounded-lg border bg-card p-4">
-          <Text as="h2" size="large" weight="semibold" className="mb-4">
-            Details for {dayjs(selectedDate).format('MMMM D, YYYY')}
-          </Text>
-          <CalendarMarker date={selectedDate} />
-        </Box>
-      )}
+      <DateSlotsModal
+        open={!!selectedDate}
+        date={selectedDate ?? ''}
+        onClose={() => setSelectedDate(null)}
+      />
     </Stack>
   );
 }
