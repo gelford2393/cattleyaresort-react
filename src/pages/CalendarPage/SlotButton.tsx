@@ -12,6 +12,10 @@ interface SlotButtonProps {
   onOpen: (bookingDocId: string) => void;
 }
 
+function assertNever(x: never): never {
+  throw new Error(`Unhandled SlotState: ${JSON.stringify(x)}`);
+}
+
 export function SlotButton({ slotState, onAdd, onOpen }: SlotButtonProps) {
   if (slotState.kind === 'empty') {
     return (
@@ -34,5 +38,5 @@ export function SlotButton({ slotState, onAdd, onOpen }: SlotButtonProps) {
       </Button>
     );
   }
-  throw new Error(`Unhandled SlotState: ${JSON.stringify(slotState)}`);
+  return assertNever(slotState);
 }
