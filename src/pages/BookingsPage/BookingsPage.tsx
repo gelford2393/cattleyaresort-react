@@ -11,8 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Stack, Flex, Text } from '@/components/ui/primitives';
 import { FormError } from '@/components/FormError';
 import { dateFilterSchema, type DateFilterInput } from '@/lib/form-schemas';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { printBookingsPDF } from './BookingsPage.logic';
 
 export function BookingsPage() {
   const navigate = useNavigate();
@@ -28,17 +27,6 @@ export function BookingsPage() {
   const onSubmit = form.handleSubmit(({ date }) => {
     setSubmittedDate(date);
   });
-
-  const handlePrint = () => {
-    const pdf = new jsPDF();
-    pdf.text(`Bookings for ${submittedDate}`, 14, 20);
-    autoTable(pdf, {
-      startY: 30,
-      head: [['Booking No', 'Customer', 'Total', 'Reserve Fee', 'Status']],
-      body: bookings.map((b) => [b.bookingNo, b.customer, `₱${b.total.toLocaleString()}`, `₱${b.reserveFee.toLocaleString()}`, b.status]),
-    });
-    pdf.save(`bookings-${submittedDate}.pdf`);
-  };
 
   const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' =>
     s === 'BOOKED' ? 'default' : s === 'CANCELLED' ? 'destructive' : 'secondary';
@@ -58,7 +46,7 @@ export function BookingsPage() {
             <FormError message={form.formState.errors.date?.message} />
           </Stack>
           <Button type="submit" disabled={isLoading}>Search</Button>
-          {bookings.length > 0 && <Button type="button" variant="outline" onClick={handlePrint}>Print PDF</Button>}
+          {bookings.length > 0 && <Button type="button" variant="outline" onClick={() => printBookingsPDF(submittedDate, bookings)}>Print PDF</Button>}
         </Flex>
       </form>
       {bookings.length > 0 && (
