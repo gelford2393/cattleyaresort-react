@@ -1,0 +1,1 @@
+export { SlotsPage } from './SlotsPage';
