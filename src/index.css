@@ -136,7 +136,103 @@
   }
 }
 
-/* FullCalendar dark mode overrides */
+/* ─── FullCalendar light-mode base ──────────────────────────────────────── */
+.fc {
+  --fc-today-bg-color: oklch(0.62 0.17 143 / 10%);
+}
+
+/* Day tile pointer + smooth hover lift */
+.fc .fc-daygrid-day {
+  cursor: pointer;
+  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.15s ease;
+  position: relative;
+  z-index: 0;
+}
+
+.fc .fc-daygrid-day:hover {
+  background-color: oklch(0.62 0.17 143 / 7%);
+  box-shadow: inset 0 0 0 1.5px oklch(0.62 0.17 143 / 35%);
+  z-index: 1;
+}
+
+/* Today cell — stronger highlight ring */
+.fc .fc-day-today {
+  background-color: var(--fc-today-bg-color) !important;
+  box-shadow: inset 0 0 0 2px oklch(0.62 0.17 143 / 60%) !important;
+}
+
+.fc .fc-day-today:hover {
+  background-color: oklch(0.62 0.17 143 / 16%) !important;
+}
+
+/* Today date number badge */
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: #509b48;
+  color: #fff;
+  border-radius: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  line-height: 1;
+  margin: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fc .fc-day-today:hover .fc-daygrid-day-number {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px oklch(0.62 0.17 143 / 40%);
+}
+
+/* All day numbers pointer */
+.fc .fc-daygrid-day-number {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+/* Event pills — transparent bg so SlotSummary text shows on the tile */
+.fc .fc-event {
+  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0;
+  transition: opacity 0.15s ease;
+}
+
+.fc .fc-event:hover {
+  opacity: 0.8;
+}
+
+.fc .fc-daygrid-event-harness {
+  margin-top: 2px;
+}
+
+/* Vertically center content in list view rows */
+.fc .fc-list-event td {
+  vertical-align: middle;
+}
+
+.fc .fc-list-event-title {
+  width: 100%;
+}
+
+/* Header nav buttons pointer */
+.fc .fc-button {
+  cursor: pointer;
+}
+
+/* Column header day names */
+.fc .fc-col-header-cell {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* ─── FullCalendar dark mode overrides ──────────────────────────────────── */
 .dark .fc {
   --fc-border-color: oklch(1 0 0 / 10%);
   --fc-button-bg-color: oklch(0.274 0.006 286.033);
@@ -163,4 +259,20 @@
 .dark .fc .fc-daygrid-day-number,
 .dark .fc .fc-col-header-cell-cushion {
   color: oklch(0.985 0.002 247.839);
+}
+
+/* Dark mode today badge stays white-on-green */
+.dark .fc .fc-day-today .fc-daygrid-day-number {
+  background: oklch(0.62 0.17 143);
+  color: #fff;
+}
+
+/* Dark mode tile hover */
+.dark .fc .fc-daygrid-day:hover {
+  background-color: oklch(0.62 0.17 143 / 12%);
+  box-shadow: inset 0 0 0 1.5px oklch(0.62 0.17 143 / 40%);
+}
+
+.dark .fc .fc-day-today {
+  box-shadow: inset 0 0 0 2px oklch(0.62 0.17 143 / 70%) !important;
 }

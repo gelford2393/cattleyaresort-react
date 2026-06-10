@@ -6,6 +6,7 @@ export interface Pool {
   night: boolean;
   dayRate: number;
   nightRate: number;
+  depositRate: number;
   colorDay: string;
   colorNight: string;
 }
@@ -39,24 +40,24 @@ export interface MenuItem {
 }
 
 const INITIAL_POOLS: Pool[] = [
-  { pool: '01-Corazon',     day: false, night: false, dayRate: 15000, nightRate: 17000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '02-Isabel',      day: false, night: false, dayRate: 16000, nightRate: 18000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '03-Cristina',    day: false, night: false, dayRate: 13000, nightRate: 15000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '04-Dominique',   day: false, night: false, dayRate: 15000, nightRate: 17000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '05-Maricor',     day: false, night: false, dayRate: 16000, nightRate: 18000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '06-Catherine',   day: false, night: false, dayRate: 11000, nightRate: 13000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '07-Arabella',    day: false, night: false, dayRate: 11000, nightRate: 13000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '08-Patricia',    day: false, night: false, dayRate: 7000,  nightRate: 8000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '09-Imelda',      day: false, night: false, dayRate: 7000,  nightRate: 8000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '10-Barbara',     day: false, night: false, dayRate: 8000,  nightRate: 9000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '11-Rafael',      day: false, night: false, dayRate: 8000,  nightRate: 9000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '12-Gabriel',     day: false, night: false, dayRate: 9000,  nightRate: 10000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '14-Daniel',      day: false, night: false, dayRate: 9000,  nightRate: 10000, colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '15-Chito',       day: false, night: false, dayRate: 4000,  nightRate: 5000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '16-David',       day: false, night: false, dayRate: 4000,  nightRate: 5000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '17-Troy',        day: false, night: false, dayRate: 4000,  nightRate: 5000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '18-Luis',        day: false, night: false, dayRate: 4000,  nightRate: 5000,  colorDay: 'yellow', colorNight: 'yellow' },
-  { pool: '19-Marco',       day: false, night: false, dayRate: 4000,  nightRate: 5000,  colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '01-Corazon',     day: false, night: false, dayRate: 15000, nightRate: 17000, depositRate: 5000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '02-Isabel',      day: false, night: false, dayRate: 16000, nightRate: 18000, depositRate: 5000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '03-Cristina',    day: false, night: false, dayRate: 13000, nightRate: 15000, depositRate: 5000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '04-Dominique',   day: false, night: false, dayRate: 15000, nightRate: 17000, depositRate: 5000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '05-Maricor',     day: false, night: false, dayRate: 16000, nightRate: 18000, depositRate: 5000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '06-Catherine',   day: false, night: false, dayRate: 11000, nightRate: 13000, depositRate: 4000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '07-Arabella',    day: false, night: false, dayRate: 11000, nightRate: 13000, depositRate: 4000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '08-Patricia',    day: false, night: false, dayRate: 7000,  nightRate: 8000,  depositRate: 3000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '09-Imelda',      day: false, night: false, dayRate: 7000,  nightRate: 8000,  depositRate: 3000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '10-Barbara',     day: false, night: false, dayRate: 8000,  nightRate: 9000,  depositRate: 3000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '11-Rafael',      day: false, night: false, dayRate: 8000,  nightRate: 9000,  depositRate: 3000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '12-Gabriel',     day: false, night: false, dayRate: 9000,  nightRate: 10000, depositRate: 4000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '14-Daniel',      day: false, night: false, dayRate: 9000,  nightRate: 10000, depositRate: 4000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '15-Chito',       day: false, night: false, dayRate: 4000,  nightRate: 5000,  depositRate: 2000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '16-David',       day: false, night: false, dayRate: 4000,  nightRate: 5000,  depositRate: 2000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '17-Troy',        day: false, night: false, dayRate: 4000,  nightRate: 5000,  depositRate: 2000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '18-Luis',        day: false, night: false, dayRate: 4000,  nightRate: 5000,  depositRate: 2000, colorDay: 'yellow', colorNight: 'yellow' },
+  { pool: '19-Marco',       day: false, night: false, dayRate: 4000,  nightRate: 5000,  depositRate: 2000, colorDay: 'yellow', colorNight: 'yellow' },
 ];
 
 const MENU_ITEMS: MenuItem[] = [

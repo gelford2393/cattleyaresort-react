@@ -18,6 +18,7 @@ export const slotSchema = z.object({
   pool: z.string(),
   type: z.enum(['DAY', 'NIGHT']),
   rate: z.number(),
+  depositRate: z.number(),
 });
 export type SlotInput = z.infer<typeof slotSchema>;
 
