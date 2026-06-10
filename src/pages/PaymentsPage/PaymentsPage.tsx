@@ -12,8 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Box, Stack, Flex, Text } from '@/components/ui/primitives';
 import { FormError } from '@/components/FormError';
 import { dateFilterSchema, type DateFilterInput } from '@/lib/form-schemas';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { groupPaymentsByType, printPaymentsPDF } from './PaymentsPage.logic';
 
 export function PaymentsPage() {
   const [submittedDate, setSubmittedDate] = useState('');
@@ -30,21 +29,7 @@ export function PaymentsPage() {
   });
 
   const grandTotal = payments.reduce((sum, p) => sum + p.amount, 0);
-  const grouped = payments.reduce<Record<string, number>>((acc, p) => {
-    acc[p.type] = (acc[p.type] ?? 0) + p.amount;
-    return acc;
-  }, {});
-
-  const handlePrint = () => {
-    const pdf = new jsPDF();
-    pdf.text(`Payments for ${submittedDate}`, 14, 20);
-    autoTable(pdf, {
-      startY: 30,
-      head: [['Type', 'Date', 'Reference', 'Booking No', 'Amount']],
-      body: payments.map((p) => [p.type, p.date, p.referenceNo, p.bookingNo, `₱${p.amount.toLocaleString()}`]),
-    });
-    pdf.save(`payments-${submittedDate}.pdf`);
-  };
+  const grouped = groupPaymentsByType(payments);
 
   return (
     <Stack gap="s0">
@@ -61,7 +46,7 @@ export function PaymentsPage() {
             <FormError message={form.formState.errors.date?.message} />
           </Stack>
           <Button type="submit" disabled={isLoading}>Search</Button>
-          {payments.length > 0 && <Button type="button" variant="outline" onClick={handlePrint}>Print PDF</Button>}
+          {payments.length > 0 && <Button type="button" variant="outline" onClick={() => printPaymentsPDF(submittedDate, payments)}>Print PDF</Button>}
         </Flex>
       </form>
 
