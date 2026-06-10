@@ -6,8 +6,9 @@ import { useBookingSearch, useDeleteBookingCascade } from '@/hooks/useBookings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -16,6 +17,8 @@ import { Stack, Flex, Text } from '@/components/ui/primitives';
 import { FormError } from '@/components/FormError';
 import { searchSchema, type SearchInput } from '@/lib/form-schemas';
 import type { Booking } from '@/lib/queries';
+import { usePagination } from '@/hooks/usePagination';
+import { TablePagination } from '@/components/TablePagination';
 
 const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' =>
   s === 'BOOKED' ? 'default' : s === 'CANCELLED' ? 'destructive' : 'secondary';
@@ -30,11 +33,10 @@ export function BookingsSearchPage() {
   });
 
   const { data: bookings = [], isLoading } = useBookingSearch(submittedQuery);
+  const pagination = usePagination(bookings, 10);
   const deleteBooking = useDeleteBookingCascade();
 
-  const onSubmit = form.handleSubmit(({ query: q }) => {
-    setSubmittedQuery(q);
-  });
+  const onSubmit = form.handleSubmit(({ query: q }) => setSubmittedQuery(q));
 
   const handleDelete = () => {
     if (!deleteTarget) return;
@@ -45,45 +47,92 @@ export function BookingsSearchPage() {
   };
 
   return (
-    <Stack gap="s0">
-      <Text as="h1" size="xxl" weight="bold">Search Bookings</Text>
-      <form onSubmit={onSubmit}>
-        <Flex align="end" className="gap-3">
-          <Stack gap="s-2">
-            <Label>Customer Name or Booking No.</Label>
-            <Input {...form.register('query')} className="w-72" />
-            <FormError message={form.formState.errors.query?.message} />
-          </Stack>
-          <Button type="submit" disabled={isLoading}>Search</Button>
-        </Flex>
-      </form>
-      {bookings.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Booking No</TableHead><TableHead>Customer</TableHead>
-              <TableHead>Date</TableHead><TableHead>Total</TableHead><TableHead>Status</TableHead><TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bookings.map((b) => (
-              <TableRow key={b.id}>
-                <TableCell className="cursor-pointer text-primary hover:underline" onClick={() => navigate(`/booking/${b.id}`)}>{b.bookingNo}</TableCell>
-                <TableCell>{b.customer}</TableCell>
-                <TableCell>{b.bookingDate}</TableCell>
-                <TableCell>₱{b.total.toLocaleString()}</TableCell>
-                <TableCell><Badge variant={statusVariant(b.status)}>{b.status}</Badge></TableCell>
-                <TableCell>
-                  <Button variant="destructive" size="sm" onClick={() => setDeleteTarget(b)}>Delete</Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-      {bookings.length === 0 && submittedQuery && !isLoading && (
-        <Text size="small" color="muted" className="text-center py-8">No bookings found</Text>
-      )}
+    <Stack gap="s1">
+      <div>
+        <Text as="h1" size="xxl" weight="bold">Search Bookings</Text>
+        <Text size="small" color="muted">Find bookings by customer name or booking number.</Text>
+      </div>
+
+      <Card>
+        <CardContent className="pt-5">
+          <form onSubmit={onSubmit}>
+            <Flex align="end" className="gap-3 flex-wrap">
+              <Stack gap="s-2" className="flex-1 min-w-0 max-w-sm">
+                <Label>Customer Name or Booking No.</Label>
+                <Input {...form.register('query')} placeholder="Search…" />
+                <FormError message={form.formState.errors.query?.message} />
+              </Stack>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Searching...' : 'Search'}
+              </Button>
+            </Flex>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <Flex align="center" justify="between">
+            <CardTitle>Results</CardTitle>
+            {bookings.length > 0 && (
+              <Text size="small" color="muted">
+                {bookings.length} booking{bookings.length !== 1 ? 's' : ''}
+                {submittedQuery ? ` for "${submittedQuery}"` : ''}
+              </Text>
+            )}
+          </Flex>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading && (
+            <div className="py-12 text-center text-muted-foreground text-sm">Searching…</div>
+          )}
+          {!isLoading && bookings.length === 0 && (
+            <div className="py-12 text-center text-muted-foreground text-sm">
+              {submittedQuery ? `No bookings found for "${submittedQuery}"` : 'No bookings found'}
+            </div>
+          )}
+          {!isLoading && bookings.length > 0 && (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Booking No</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pagination.pageItems.map((b) => (
+                    <TableRow key={b.id}>
+                      <TableCell
+                        className="cursor-pointer text-primary hover:underline font-mono text-xs"
+                        onClick={() => navigate(`/booking/${b.id}`)}
+                      >
+                        {b.bookingNo}
+                      </TableCell>
+                      <TableCell className="font-medium">{b.customer}</TableCell>
+                      <TableCell className="text-muted-foreground">{b.bookingDate}</TableCell>
+                      <TableCell>₱{b.total.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant(b.status)}>{b.status}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="destructive" size="sm" onClick={() => setDeleteTarget(b)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <TablePagination {...pagination} />
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>

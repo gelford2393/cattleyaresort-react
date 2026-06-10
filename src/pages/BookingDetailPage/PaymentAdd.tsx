@@ -1,4 +1,5 @@
 import { useForm, useWatch, Controller } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,9 +15,9 @@ import { paymentSchema, type PaymentInput, PAYMENT_TYPES } from '@/lib/form-sche
 type PaymentFormInput = z.input<typeof paymentSchema>;
 
 interface Payment { type: string; date: string; referenceNo: string; amount: number; }
-interface Props { open: boolean; onClose: () => void; onSave: (p: Payment) => void; }
+interface Props { open: boolean; onClose: () => void; onSave: (p: Payment) => void; isPending?: boolean; }
 
-export function PaymentAdd({ open, onClose, onSave }: Props) {
+export function PaymentAdd({ open, onClose, onSave, isPending }: Props) {
   const form = useForm<PaymentFormInput, unknown, PaymentInput>({
     resolver: zodResolver(paymentSchema),
     defaultValues: { type: undefined, date: '', referenceNo: '', amount: undefined },
@@ -83,8 +84,11 @@ export function PaymentAdd({ open, onClose, onSave }: Props) {
               <FormError message={form.formState.errors.amount?.message} />
             </Stack>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={close}>Close</Button>
-              <Button type="submit">Save</Button>
+              <Button type="button" variant="outline" onClick={close} disabled={isPending}>Close</Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save
+              </Button>
             </DialogFooter>
           </Stack>
         </form>

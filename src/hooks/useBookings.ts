@@ -33,7 +33,7 @@ export function useBookingSearch(q: string) {
   return useQuery({
     queryKey: ['bookings', 'search', q],
     queryFn: () => fetchBookingSearch(q),
-    enabled: !!q,
+    enabled: true,
   });
 }
 

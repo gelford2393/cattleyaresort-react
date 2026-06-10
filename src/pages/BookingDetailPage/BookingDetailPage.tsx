@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import {
   useBookingDetail,
   useUpdateBookingStatus,
@@ -12,7 +14,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Box, Stack, Flex, Text } from '@/components/ui/primitives';
 import { AdditionalAdd } from './AdditionalAdd';
 import { DiscountAdd } from './DiscountAdd';
@@ -44,7 +45,10 @@ export function BookingDetailPage() {
   const balance = booking.total - totalPayments;
 
   const handleStatusChange = (status: string) => {
-    updateStatus.mutate(status);
+    updateStatus.mutate(status, {
+      onSuccess: () => toast.success('Status updated'),
+      onError: () => toast.error('Failed to update status'),
+    });
   };
 
   const handleAddDiscount = (discount: { careOfBy: string; others: string; amount: number }) => {
@@ -55,7 +59,10 @@ export function BookingDetailPage() {
       (booking.additionals ?? []).reduce((s, a) => s + a.amount, 0);
     updateDiscounts.mutate(
       { discounts: newDiscounts, total: newTotal },
-      { onSuccess: () => setShowDiscount(false) }
+      {
+        onSuccess: () => { setShowDiscount(false); toast.success('Discount added'); },
+        onError: () => toast.error('Failed to add discount'),
+      }
     );
   };
 
@@ -67,14 +74,20 @@ export function BookingDetailPage() {
       newAdditionals.reduce((s, a) => s + a.amount, 0);
     updateAdditionals.mutate(
       { additionals: newAdditionals, total: newTotal },
-      { onSuccess: () => setShowAdditional(false) }
+      {
+        onSuccess: () => { setShowAdditional(false); toast.success('Additional charge added'); },
+        onError: () => toast.error('Failed to add additional charge'),
+      }
     );
   };
 
   const handleAddPayment = (payment: { type: string; date: string; referenceNo: string; amount: number }) => {
     addPayment.mutate(
       { bookingDocId: id!, bookingNo: booking.bookingNo, ...payment },
-      { onSuccess: () => setShowPayment(false) }
+      {
+        onSuccess: () => { setShowPayment(false); toast.success('Payment recorded'); },
+        onError: () => toast.error('Failed to record payment'),
+      }
     );
   };
 
@@ -86,7 +99,8 @@ export function BookingDetailPage() {
           <Text color="muted">{booking.customer} · {booking.bookingDate}</Text>
         </Box>
         <Flex align="center" gap="s-1">
-          <Select value={booking.status} onValueChange={handleStatusChange}>
+          {updateStatus.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          <Select value={booking.status} onValueChange={handleStatusChange} disabled={updateStatus.isPending}>
             <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -192,23 +206,42 @@ export function BookingDetailPage() {
                 </TableBody>
               </Table>
           }
-          <Stack className="mt-2 space-y-1 text-sm text-right">
-            <Box>Total: <strong>₱{booking.total.toLocaleString()}</strong></Box>
-            <Box>Paid: <strong>₱{totalPayments.toLocaleString()}</strong></Box>
-            <Box>Balance: <strong className={balance > 0 ? 'text-destructive' : 'text-success'}>₱{balance.toLocaleString()}</strong></Box>
-          </Stack>
+          <div className="mt-4 pt-3 border-t text-sm w-64 ml-auto space-y-1">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Subtotal</span>
+              <span className="text-foreground font-medium">₱{booking.subTotal.toLocaleString()}</span>
+            </div>
+            {(booking.discount ?? 0) > 0 && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>Discount</span>
+                <span className="text-foreground font-medium">-₱{(booking.discount ?? 0).toLocaleString()}</span>
+              </div>
+            )}
+            {(booking.additionals ?? []).length > 0 && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>Additional</span>
+                <span className="text-foreground font-medium">+₱{(booking.additionals ?? []).reduce((s, a) => s + a.amount, 0).toLocaleString()}</span>
+              </div>
+            )}
+            <div className="flex justify-between pt-1 border-t font-semibold">
+              <span>Total</span>
+              <span>₱{booking.total.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Paid</span>
+              <span className="text-foreground font-medium">₱{totalPayments.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between font-semibold">
+              <span>Balance</span>
+              <span className={balance > 0 ? 'text-destructive' : 'text-success'}>₱{balance.toLocaleString()}</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {updateStatus.isError && (
-        <Alert variant="destructive">
-          <AlertDescription>Failed to update status. Please try again.</AlertDescription>
-        </Alert>
-      )}
-
-      <AdditionalAdd open={showAdditional} onClose={() => setShowAdditional(false)} onSave={handleAddAdditional} />
-      <DiscountAdd open={showDiscount} onClose={() => setShowDiscount(false)} onSave={handleAddDiscount} />
-      <PaymentAdd open={showPayment} onClose={() => setShowPayment(false)} onSave={handleAddPayment} />
+      <AdditionalAdd open={showAdditional} onClose={() => setShowAdditional(false)} onSave={handleAddAdditional} isPending={updateAdditionals.isPending} />
+      <DiscountAdd open={showDiscount} onClose={() => setShowDiscount(false)} onSave={handleAddDiscount} isPending={updateDiscounts.isPending} />
+      <PaymentAdd open={showPayment} onClose={() => setShowPayment(false)} onSave={handleAddPayment} isPending={addPayment.isPending} />
     </Stack>
   );
 

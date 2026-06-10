@@ -1,4 +1,5 @@
 import { useForm, useWatch, Controller } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,9 +14,9 @@ import { additionalSchema, type AdditionalInput, CHARGE_OPTIONS } from '@/lib/fo
 type AdditionalFormInput = z.input<typeof additionalSchema>;
 
 interface AdditionalItem { description: string; amount: number; }
-interface Props { open: boolean; onClose: () => void; onSave: (item: AdditionalItem) => void; }
+interface Props { open: boolean; onClose: () => void; onSave: (item: AdditionalItem) => void; isPending?: boolean; }
 
-export function AdditionalAdd({ open, onClose, onSave }: Props) {
+export function AdditionalAdd({ open, onClose, onSave, isPending }: Props) {
   const form = useForm<AdditionalFormInput, unknown, AdditionalInput>({
     resolver: zodResolver(additionalSchema),
     defaultValues: { description: undefined, customDesc: '', amount: undefined },
@@ -67,8 +68,11 @@ export function AdditionalAdd({ open, onClose, onSave }: Props) {
               <FormError message={form.formState.errors.amount?.message} />
             </Stack>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={close}>Close</Button>
-              <Button type="submit">Save</Button>
+              <Button type="button" variant="outline" onClick={close} disabled={isPending}>Close</Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save
+              </Button>
             </DialogFooter>
           </Stack>
         </form>

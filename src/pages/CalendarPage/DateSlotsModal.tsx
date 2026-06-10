@@ -108,8 +108,10 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
       <Dialog open={open} onOpenChange={handleAttemptClose}>
         <DialogContent
           className={
-            isReserveView
+            isReserveView && bookingMode === 'multiple'
               ? 'w-[95vw] sm:max-w-7xl max-h-[90vh] overflow-y-auto'
+              : isReserveView && bookingMode === 'single'
+              ? 'sm:max-w-lg max-h-[90vh] overflow-y-auto'
               : 'sm:max-w-3xl max-h-[80vh] overflow-y-auto'
           }
         >

@@ -88,44 +88,74 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, hidePoo
 
   return (
     <form onSubmit={onSubmit}>
-      <div className={hidePoolSelector ? undefined : 'grid lg:grid-cols-[1fr_400px] gap-[var(--s1)]'}>
+      {!hidePoolSelector && <Text size="large" weight="semibold" className="mb-3">Select Pools</Text>}
+      <div className={hidePoolSelector ? undefined : 'grid lg:grid-cols-[1fr_400px] gap-[var(--s1)] items-start'}>
         {!hidePoolSelector && <Box>
-          <Text size="large" weight="semibold" className="mb-3">Select Pools</Text>
           <div className="max-h-[600px] overflow-y-auto pr-2">
             <Box className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-[var(--s-1)]">
-              {pools.map((pool) => (
-                <Card key={pool.pool} className="p-3 hover:shadow-md transition-shadow cursor-pointer">
-                  <Text size="small" weight="medium" className="mb-2">{pool.pool}</Text>
-                  <Stack gap="s-2">
-                    <label className={`flex items-center gap-2 ${isTaken(pool.pool, 'DAY') ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
-                      <input
-                        type="checkbox"
-                        checked={isSelected(pool.pool, 'DAY')}
-                        disabled={isTaken(pool.pool, 'DAY')}
-                        onChange={() => toggleSlot(pool.pool, 'DAY', pool.dayRate, pool.depositRate)}
-                        className="cursor-pointer disabled:cursor-not-allowed"
-                      />
-                      <Text as="span" size="small">
-                        Day ₱{pool.dayRate.toLocaleString()}
-                        {isTaken(pool.pool, 'DAY') && ' (taken)'}
-                      </Text>
-                    </label>
-                    <label className={`flex items-center gap-2 ${isTaken(pool.pool, 'NIGHT') ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
-                      <input
-                        type="checkbox"
-                        checked={isSelected(pool.pool, 'NIGHT')}
-                        disabled={isTaken(pool.pool, 'NIGHT')}
-                        onChange={() => toggleSlot(pool.pool, 'NIGHT', pool.nightRate, pool.depositRate)}
-                        className="cursor-pointer disabled:cursor-not-allowed"
-                      />
-                      <Text as="span" size="small">
-                        Night ₱{pool.nightRate.toLocaleString()}
-                        {isTaken(pool.pool, 'NIGHT') && ' (taken)'}
-                      </Text>
-                    </label>
-                  </Stack>
-                </Card>
-              ))}
+              {pools.map((pool) => {
+                const daySelected = isSelected(pool.pool, 'DAY');
+                const nightSelected = isSelected(pool.pool, 'NIGHT');
+                const anySelected = daySelected || nightSelected;
+                return (
+                  <Card
+                    key={pool.pool}
+                    className={`p-4 transition-all duration-200 ${
+                      anySelected
+                        ? 'border-primary/60 bg-primary/5 shadow-md shadow-primary/10'
+                        : 'hover:border-primary/30 hover:shadow-md'
+                    }`}
+                  >
+                    <p className="text-base font-bold tracking-wide mb-3 leading-none">{pool.pool}</p>
+                    <Stack gap="s-2">
+                      {/* Day slot */}
+                      <label
+                        className={`flex items-center gap-3 rounded-md px-2 py-1.5 -mx-2 transition-colors ${
+                          isTaken(pool.pool, 'DAY')
+                            ? 'opacity-40 cursor-not-allowed'
+                            : daySelected
+                            ? 'bg-primary/10 cursor-pointer'
+                            : 'hover:bg-muted/50 cursor-pointer'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={daySelected}
+                          disabled={isTaken(pool.pool, 'DAY')}
+                          onChange={() => toggleSlot(pool.pool, 'DAY', pool.dayRate, pool.depositRate)}
+                          className="h-4 w-4 accent-primary cursor-pointer disabled:cursor-not-allowed shrink-0"
+                        />
+                        <span className="flex items-center justify-between w-full text-sm font-medium leading-none">
+                          <span>Day{isTaken(pool.pool, 'DAY') && <span className="text-xs text-muted-foreground ml-1">(taken)</span>}</span>
+                          <span>₱{pool.dayRate.toLocaleString()}</span>
+                        </span>
+                      </label>
+                      {/* Night slot */}
+                      <label
+                        className={`flex items-center gap-3 rounded-md px-2 py-1.5 -mx-2 transition-colors ${
+                          isTaken(pool.pool, 'NIGHT')
+                            ? 'opacity-40 cursor-not-allowed'
+                            : nightSelected
+                            ? 'bg-primary/10 cursor-pointer'
+                            : 'hover:bg-muted/50 cursor-pointer'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={nightSelected}
+                          disabled={isTaken(pool.pool, 'NIGHT')}
+                          onChange={() => toggleSlot(pool.pool, 'NIGHT', pool.nightRate, pool.depositRate)}
+                          className="h-4 w-4 accent-primary cursor-pointer disabled:cursor-not-allowed shrink-0"
+                        />
+                        <span className="flex items-center justify-between w-full text-sm font-medium leading-none">
+                          <span>Night{isTaken(pool.pool, 'NIGHT') && <span className="text-xs text-muted-foreground ml-1">(taken)</span>}</span>
+                          <span>₱{pool.nightRate.toLocaleString()}</span>
+                        </span>
+                      </label>
+                    </Stack>
+                  </Card>
+                );
+              })}
             </Box>
           </div>
           <FormError message={form.formState.errors.slots?.message} />
