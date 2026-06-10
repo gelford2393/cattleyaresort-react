@@ -12,13 +12,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AdditionalAdd } from '@/components/AdditionalAdd';
-import { DiscountAdd } from '@/components/DiscountAdd';
-import { PaymentAdd } from '@/components/PaymentAdd';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Box, Stack, Flex, Text } from '@/components/ui/primitives';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { AdditionalAdd } from './AdditionalAdd';
+import { DiscountAdd } from './DiscountAdd';
+import { PaymentAdd } from './PaymentAdd';
+import { printBookingPDF } from './BookingDetailPage.logic';
 
 const STATUS_OPTIONS = ['PENDING', 'BOOKED', 'CANCELLED'];
 
@@ -79,29 +78,6 @@ export function BookingDetailPage() {
     );
   };
 
-  const handlePrint = () => {
-    const pdf = new jsPDF();
-    pdf.setFontSize(16);
-    pdf.text('Cattleya Resort - Booking Receipt', 14, 20);
-    pdf.setFontSize(11);
-    pdf.text(`Booking No: ${booking.bookingNo}`, 14, 35);
-    pdf.text(`Date: ${booking.bookingDate}`, 14, 42);
-    pdf.text(`Customer: ${booking.customer}`, 14, 49);
-    pdf.text(`Status: ${booking.status}`, 14, 56);
-    autoTable(pdf, {
-      startY: 65,
-      head: [['Pool', 'Type', 'Rate']],
-      body: booking.slots.map((s) => [s.pool, s.type, `₱${s.rate.toLocaleString()}`]),
-    });
-    const finalY = (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
-    pdf.text(`Subtotal: ₱${booking.subTotal.toLocaleString()}`, 14, finalY);
-    pdf.text(`Discount: ₱${(booking.discount ?? 0).toLocaleString()}`, 14, finalY + 7);
-    pdf.text(`Total: ₱${booking.total.toLocaleString()}`, 14, finalY + 14);
-    pdf.text(`Paid: ₱${totalPayments.toLocaleString()}`, 14, finalY + 21);
-    pdf.text(`Balance: ₱${balance.toLocaleString()}`, 14, finalY + 28);
-    pdf.save(`${booking.bookingNo}.pdf`);
-  };
-
   const content = (
     <Stack gap="s1">
       <Flex align="center" justify="between" wrap="wrap" gap="s-1">
@@ -116,7 +92,7 @@ export function BookingDetailPage() {
               {STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={handlePrint}>Print PDF</Button>
+          <Button variant="outline" onClick={() => printBookingPDF(booking, payments)}>Print PDF</Button>
         </Flex>
       </Flex>
 
