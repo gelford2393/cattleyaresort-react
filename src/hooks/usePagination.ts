@@ -5,8 +5,9 @@ export function usePagination<T>(items: T[], pageSize = 10) {
 
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
 
-  // Reset to page 1 whenever items change (new search result)
-  useEffect(() => { setPage(1); }, [items]);
+  // Clamp to valid range when the dataset shrinks (e.g. new search with fewer results).
+  // Avoids resetting to page 1 on every background refetch that returns a new array reference.
+  useEffect(() => { setPage((p) => Math.min(p, totalPages)); }, [totalPages]);
 
   const start = (page - 1) * pageSize;
   const pageItems = items.slice(start, start + pageSize);

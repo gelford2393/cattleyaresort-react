@@ -6,6 +6,7 @@ import {
   getDoc,
   getDocs,
   query,
+  runTransaction,
   Timestamp,
   updateDoc,
   where,
@@ -32,53 +33,55 @@ export interface CreatePaymentInput {
 }
 
 export async function createBooking(input: CreateBookingInput): Promise<string> {
-  // Conflict check — reject if any requested slot is already taken for this date
-  const existingSnap = await getDocs(
-    query(collection(firestore, 'slots'), where('date', '==', input.bookingDate))
+  // Use deterministic slot doc IDs so we can atomically check and write each slot
+  // inside a transaction, preventing double-bookings from concurrent requests.
+  const slotRefs = input.slots.map((s) =>
+    doc(firestore, 'slots', `${input.bookingDate}_${s.pool}_${s.type}`)
   );
-  const takenCombos = new Set(
-    existingSnap.docs
-      .filter((d) => d.data().status !== 'CANCELLED')
-      .map((d) => `${d.data().pool}-${d.data().type}`)
-  );
-  const conflicts = input.slots.filter((s) => takenCombos.has(`${s.pool}-${s.type}`));
-  if (conflicts.length > 0) {
-    throw new Error(
-      `Slot(s) already taken: ${conflicts.map((s) => `${s.pool} ${s.type}`).join(', ')}`
-    );
-  }
-
+  const bookingRef = doc(collection(firestore, 'bookings'));
   const bookingNo = `CR-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const user = auth.currentUser;
   const reserveFee = input.slots.reduce((sum, s) => sum + s.depositRate, 0);
 
-  const bookingRef = await addDoc(collection(firestore, 'bookings'), {
-    bookingNo,
-    bookingDate: input.bookingDate,
-    customer: input.customer,
-    email: input.email,
-    phone: input.phone,
-    slots: input.slots,
-    subTotal: input.subTotal,
-    discount: 0,
-    total: input.subTotal,
-    reserveFee,
-    status: 'PENDING',
-    createdBy: user?.email ?? '',
-    createdAt: Timestamp.now(),
-  });
-  await Promise.all(
-    input.slots.map((slot) =>
-      addDoc(collection(firestore, 'slots'), {
+  await runTransaction(firestore, async (tx) => {
+    const slotSnaps = await Promise.all(slotRefs.map((ref) => tx.get(ref)));
+    const conflicts = input.slots.filter(
+      (_, i) => slotSnaps[i].exists() && slotSnaps[i].data()!.status !== 'CANCELLED'
+    );
+    if (conflicts.length > 0) {
+      throw new Error(
+        `Slot(s) already taken: ${conflicts.map((s) => `${s.pool} ${s.type}`).join(', ')}`
+      );
+    }
+
+    tx.set(bookingRef, {
+      bookingNo,
+      bookingDate: input.bookingDate,
+      customer: input.customer,
+      email: input.email,
+      phone: input.phone,
+      slots: input.slots,
+      subTotal: input.subTotal,
+      discount: 0,
+      total: input.subTotal,
+      reserveFee,
+      status: 'PENDING',
+      createdBy: user?.email ?? '',
+      createdAt: Timestamp.now(),
+    });
+
+    input.slots.forEach((slot, i) => {
+      tx.set(slotRefs[i], {
         bookingNo,
         bookingDocId: bookingRef.id,
         pool: slot.pool,
         type: slot.type,
         date: input.bookingDate,
         status: 'PENDING',
-      })
-    )
-  );
+      });
+    });
+  });
+
   return bookingRef.id;
 }
 

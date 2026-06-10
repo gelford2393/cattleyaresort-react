@@ -20,7 +20,7 @@ import { DiscountAdd } from './DiscountAdd';
 import { PaymentAdd } from './PaymentAdd';
 import { printBookingPDF } from './BookingDetailPage.logic';
 
-const STATUS_OPTIONS = ['PENDING', 'BOOKED', 'CANCELLED'];
+const STATUS_OPTIONS = ['PENDING', 'BOOKED', 'CANCELLED', 'PENCIL'];
 
 export function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
