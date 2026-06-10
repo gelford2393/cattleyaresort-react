@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppStore } from '@/store/useAppStore';
@@ -20,9 +21,10 @@ interface ReserveFormProps {
   hidePoolSelector?: boolean;
   takenSlots?: { pool: string; type: 'DAY' | 'NIGHT' }[];
   onSuccess?: (bookingDocId: string) => void;
+  onDateChange?: (date: string) => void;
 }
 
-export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, hidePoolSelector, takenSlots = [], onSuccess }: ReserveFormProps) {
+export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, hidePoolSelector, takenSlots = [], onSuccess, onDateChange }: ReserveFormProps) {
   const pools = useAppStore((s) => s.pools);
   const createBooking = useCreateBooking();
 
@@ -50,6 +52,16 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, hidePoo
 
   const selectedSlots = useWatch({ control: form.control, name: 'slots' });
   const bookingDateValue = useWatch({ control: form.control, name: 'bookingDate' });
+
+  const takenKey = takenSlots.map((s) => `${s.pool}-${s.type}`).sort().join(',');
+  useEffect(() => {
+    const current = form.getValues('slots');
+    const filtered = current.filter((s) => !takenSlots.some((t) => t.pool === s.pool && t.type === s.type));
+    if (filtered.length !== current.length) {
+      form.setValue('slots', filtered, { shouldValidate: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [takenKey]);
 
   const toggleSlot = (pool: string, type: 'DAY' | 'NIGHT', rate: number, depositRate: number) => {
     const exists = selectedSlots.find((s) => s.pool === pool && s.type === type);
@@ -168,7 +180,10 @@ export function ReserveForm({ defaultPool, defaultDate, defaultSlotType, hidePoo
                 <Label>Booking Date *</Label>
                 <DatePicker
                   value={bookingDateValue}
-                  onChange={(date) => form.setValue('bookingDate', date, { shouldValidate: true })}
+                  onChange={(date) => {
+                    form.setValue('bookingDate', date, { shouldValidate: true });
+                    onDateChange?.(date);
+                  }}
                   placeholder="Select booking date"
                 />
                 <FormError message={form.formState.errors.bookingDate?.message} />

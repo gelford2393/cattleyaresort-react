@@ -1,6 +1,6 @@
 import { useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pencil, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import dayjs from 'dayjs';
 import { useAppStore } from '@/store/useAppStore';
 import { useSlotsByDate } from '@/hooks/useSlots';
@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Slot } from '@/lib/queries';
+import { SlotButton, type SlotState } from './SlotButton';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -47,11 +48,6 @@ function reducer(_state: CalendarModalView, action: CalendarModalAction): Calend
 
 // ── Slot state helpers ─────────────────────────────────────────────────────────
 
-type SlotState =
-  | { kind: 'empty' }
-  | { kind: 'pending'; bookingDocId: string }
-  | { kind: 'booked'; bookingDocId: string };
-
 function resolveSlotState(slots: Slot[], pool: string, slotType: 'DAY' | 'NIGHT'): SlotState {
   const slot = slots.find((s) => s.pool === pool && s.type === slotType && s.status !== 'CANCELLED');
   if (!slot) return { kind: 'empty' };
@@ -74,8 +70,9 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
   const [state, dispatch] = useReducer(reducer, { view: 'table' });
   const [showDiscard, setShowDiscard] = useState(false);
   const [bookingMode, setBookingMode] = useState<'single' | 'multiple'>('single');
+  const [reserveDate, setReserveDate] = useState(date);
+  const { data: reserveDateSlots = [] } = useSlotsByDate(reserveDate);
 
-  // Intercept close: if user is mid-form, show discard confirmation first
   const handleAttemptClose = () => {
     if (state.view === 'reserve') {
       setShowDiscard(true);
@@ -91,6 +88,7 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
   };
 
   const handleAddClick = (pool: string, slotType: 'DAY' | 'NIGHT') => {
+    setReserveDate(date);
     dispatch({ type: 'open_reserve', pool, date, slotType });
   };
 
@@ -115,7 +113,6 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
               : 'sm:max-w-3xl max-h-[80vh] overflow-y-auto'
           }
         >
-          {/* ── Step 1: Pool grid ─────────────────────────────────────── */}
           {state.view === 'table' && (
             <>
               <DialogHeader>
@@ -179,23 +176,42 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
             </>
           )}
 
-          {/* ── Step 2: Reservation form ──────────────────────────────── */}
           {state.view === 'reserve' && (
             <>
               <DialogHeader>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5 px-2 -ml-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => dispatch({ type: 'back_to_table' })}
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </Button>
-                  <DialogTitle>
-                    New Reservation — {state.pool} · {state.slotType} · {state.date}
-                  </DialogTitle>
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 px-2 -ml-1 text-muted-foreground hover:text-foreground"
+                      onClick={() => dispatch({ type: 'back_to_table' })}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back
+                    </Button>
+                    <DialogTitle>
+                      New Reservation — {state.pool} · {state.slotType} · {reserveDate}
+                    </DialogTitle>
+                  </div>
+                  <div className="flex items-center gap-1 rounded-lg border p-1 text-sm">
+                    <Button
+                      variant={bookingMode === 'single' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 px-3"
+                      onClick={() => setBookingMode('single')}
+                    >
+                      Single
+                    </Button>
+                    <Button
+                      variant={bookingMode === 'multiple' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 px-3"
+                      onClick={() => setBookingMode('multiple')}
+                    >
+                      Multiple
+                    </Button>
+                  </div>
                 </div>
               </DialogHeader>
 
@@ -204,17 +220,17 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
                 defaultDate={state.date}
                 defaultSlotType={state.slotType}
                 hidePoolSelector={bookingMode === 'single'}
-                takenSlots={slots
+                takenSlots={reserveDateSlots
                   .filter((s) => s.status !== 'CANCELLED')
                   .map((s) => ({ pool: s.pool, type: s.type }))}
                 onSuccess={handleReserveSuccess}
+                onDateChange={setReserveDate}
               />
             </>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Discard confirmation */}
       <AlertDialog open={showDiscard} onOpenChange={setShowDiscard}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -231,49 +247,4 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
       </AlertDialog>
     </>
   );
-}
-
-// ── SlotButton ────────────────────────────────────────────────────────────────
-
-interface SlotButtonProps {
-  slotState: SlotState;
-  onAdd: () => void;
-  onOpen: (bookingDocId: string) => void;
-}
-
-function SlotButton({ slotState, onAdd, onOpen }: SlotButtonProps) {
-  if (slotState.kind === 'empty') {
-    return (
-      <Button
-        size="sm"
-        className="w-20 bg-success hover:bg-success/90 text-success-foreground"
-        onClick={onAdd}
-      >
-        ADD
-      </Button>
-    );
-  }
-  if (slotState.kind === 'pending') {
-    return (
-      <Button
-        size="sm"
-        className="w-20 bg-warning hover:bg-warning/90 text-warning-foreground"
-        onClick={() => onOpen(slotState.bookingDocId)}
-      >
-        <Pencil className="h-4 w-4" />
-      </Button>
-    );
-  }
-  if (slotState.kind === 'booked') {
-    return (
-      <Button
-        size="sm"
-        className="w-20 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-        onClick={() => onOpen(slotState.bookingDocId)}
-      >
-        BOOKED
-      </Button>
-    );
-  }
-  return assertNever(slotState);
 }
