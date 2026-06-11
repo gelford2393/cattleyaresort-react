@@ -34,7 +34,7 @@ export function LoginPage() {
       `}</style>
 
       <div
-        className="w-[400px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/80"
+        className="dark text-foreground w-[400px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/80"
         style={{ background: 'linear-gradient(160deg, #0c1a0e 0%, #080e09 50%, #050808 100%)' }}
       >
         {/* ── Logo section ───────────────────────────────── */}
@@ -51,15 +51,15 @@ export function LoginPage() {
             {/* Logo circle */}
             <div
               className="relative z-10 h-24 w-24 rounded-full p-[3px]"
-              style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.4) 0%, rgba(21,128,61,0.15) 100%)' }}
+              style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.5) 0%, rgba(21,128,61,0.25) 100%)' }}
             >
-              <div className="h-full w-full rounded-full bg-black/70 flex items-center justify-center overflow-hidden p-2"
-                style={{ boxShadow: '0 0 24px 4px rgba(34,197,94,0.15) inset' }}
+              <div className="h-full w-full rounded-full bg-white overflow-hidden flex items-center justify-center"
+                style={{ boxShadow: '0 0 20px 4px rgba(34,197,94,0.2)' }}
               >
                 <img
-                  src="/cattleyaresortlogo.png"
+                  src="/cattleyalogo.png"
                   alt="Cattleya Resort"
-                  className="h-full w-full object-contain drop-shadow-lg"
+                  className="h-full w-full object-cover scale-[1.15]"
                 />
               </div>
             </div>

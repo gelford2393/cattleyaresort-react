@@ -18,12 +18,12 @@ export function LoginForm({ form, onSubmit }: Props) {
       <Stack gap="s0">
         <Stack gap="s-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" {...form.register('email')} />
+          <Input id="email" className="bg-white/15 border-white/25 text-white placeholder:text-white/45" {...form.register('email')} />
           <FormError message={form.formState.errors.email?.message} />
         </Stack>
         <Stack gap="s-2">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" {...form.register('password')} />
+          <Input id="password" type="password" className="bg-white/15 border-white/25 text-white placeholder:text-white/45" {...form.register('password')} />
           <FormError message={form.formState.errors.password?.message} />
         </Stack>
         <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">

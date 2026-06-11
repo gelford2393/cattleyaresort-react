@@ -13,7 +13,7 @@ export function ListSlotRow({ pool, type, status }: SlotEventProps) {
   const statusLabel = isPending ? 'Pending' : 'Booked';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', flexWrap: 'wrap', width: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', flexWrap: 'wrap', width: '100%', color: 'var(--foreground)' }}>
       <span style={{ fontWeight: 700 }}>{pool}</span>
       <span style={{ opacity: 0.35 }}>·</span>
       <span style={{ opacity: 0.85 }}>{getTypeLabel(type)}</span>

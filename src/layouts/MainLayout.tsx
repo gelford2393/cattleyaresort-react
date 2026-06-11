@@ -45,7 +45,7 @@ export function MainLayout() {
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => setOpen(true)}>
           <Menu className="h-5 w-5" />
         </Button>
-        <img src="/cattleyaresortlogo.png" alt="logo" className="h-8 object-contain" />
+        <img src="/cattleyalogo.png" alt="logo" className="h-8 object-contain" />
         <span className="flex-1 font-semibold text-sm">Cattleya Resort</span>
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => setIsDark((prev) => !prev)}>
           {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
