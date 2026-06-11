@@ -2,7 +2,7 @@ export interface DayCounts { dayP: number; dayB: number; nightP: number; nightB:
 
 export function SlotSummary({ dayP, dayB, nightP, nightB }: DayCounts) {
   return (
-    <div style={{ fontSize: '0.7rem', lineHeight: 1.5, padding: '1px 4px', width: '100%', background: 'transparent', color: 'inherit' }}>
+    <div style={{ fontSize: '0.7rem', lineHeight: 1.5, padding: '1px 4px', width: '100%', background: 'transparent', color: 'var(--foreground)' }}>
       {(nightP > 0 || nightB > 0) && (
         <div>
           <span style={{ opacity: 0.65 }}>Night: </span>

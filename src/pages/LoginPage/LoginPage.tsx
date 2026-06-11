@@ -34,7 +34,7 @@ export function LoginPage() {
       `}</style>
 
       <div
-        className="w-[400px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/80"
+        className="dark text-foreground w-[400px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/80"
         style={{ background: 'linear-gradient(160deg, #0c1a0e 0%, #080e09 50%, #050808 100%)' }}
       >
         {/* ── Logo section ───────────────────────────────── */}
