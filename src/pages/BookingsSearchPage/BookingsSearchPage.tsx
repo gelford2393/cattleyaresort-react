@@ -93,27 +93,27 @@ export function BookingsSearchPage() {
           )}
           {!isLoading && bookings.length > 0 && (
             <>
-              <Table>
+              <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Booking No</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="w-[24%]">Booking No</TableHead>
+                    <TableHead className="w-[24%]">Customer</TableHead>
+                    <TableHead className="w-[14%]">Date</TableHead>
+                    <TableHead className="w-[13%]">Total</TableHead>
+                    <TableHead className="w-[13%]">Status</TableHead>
+                    <TableHead className="w-[12%]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pagination.pageItems.map((b) => (
                     <TableRow key={b.id}>
                       <TableCell
-                        className="cursor-pointer text-primary hover:underline font-mono text-xs"
+                        className="cursor-pointer text-primary hover:underline font-mono text-xs truncate"
                         onClick={() => navigate(`/booking/${b.id}`)}
                       >
                         {b.bookingNo}
                       </TableCell>
-                      <TableCell className="font-medium">{b.customer}</TableCell>
+                      <TableCell className="font-medium truncate">{b.customer}</TableCell>
                       <TableCell className="text-muted-foreground">{b.bookingDate}</TableCell>
                       <TableCell>₱{b.total.toLocaleString()}</TableCell>
                       <TableCell>

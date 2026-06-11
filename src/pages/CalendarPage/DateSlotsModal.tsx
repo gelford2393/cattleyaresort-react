@@ -141,12 +141,12 @@ export function DateSlotsModal({ open, date, onClose }: DateSlotsModalProps) {
                 </div>
               </DialogHeader>
 
-              <Table>
+              <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Pool</TableHead>
-                    <TableHead className="text-center">Day</TableHead>
-                    <TableHead className="text-center">Night</TableHead>
+                    <TableHead className="w-[50%]">Pool</TableHead>
+                    <TableHead className="w-[25%] text-center">Day</TableHead>
+                    <TableHead className="w-[25%] text-center">Night</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

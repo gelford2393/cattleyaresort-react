@@ -113,9 +113,9 @@ export function BookingDetailPage() {
       <Card>
         <CardHeader><CardTitle>Slots</CardTitle></CardHeader>
         <CardContent>
-          <Table>
+          <Table className="table-fixed w-full">
             <TableHeader><TableRow>
-              <TableHead>Pool</TableHead><TableHead>Type</TableHead><TableHead>Rate</TableHead>
+              <TableHead className="w-[45%]">Pool</TableHead><TableHead className="w-[30%]">Type</TableHead><TableHead className="w-[25%]">Rate</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {booking.slots.map((s, i) => (
@@ -139,9 +139,9 @@ export function BookingDetailPage() {
         <CardContent>
           {(booking.discounts ?? []).length === 0
             ? <Text size="small" color="muted">No discounts</Text>
-            : <Table>
+            : <Table className="table-fixed w-full">
                 <TableHeader><TableRow>
-                  <TableHead>Care of By</TableHead><TableHead>Reason</TableHead><TableHead>Amount</TableHead>
+                  <TableHead className="w-[30%]">Care of By</TableHead><TableHead className="w-[50%]">Reason</TableHead><TableHead className="w-[20%]">Amount</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {(booking.discounts ?? []).map((d, i) => (
@@ -165,9 +165,9 @@ export function BookingDetailPage() {
         <CardContent>
           {(booking.additionals ?? []).length === 0
             ? <Text size="small" color="muted">No additional charges</Text>
-            : <Table>
+            : <Table className="table-fixed w-full">
                 <TableHeader><TableRow>
-                  <TableHead>Description</TableHead><TableHead>Amount</TableHead>
+                  <TableHead className="w-[75%]">Description</TableHead><TableHead className="w-[25%]">Amount</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {(booking.additionals ?? []).map((a, i) => (
@@ -190,16 +190,16 @@ export function BookingDetailPage() {
         <CardContent>
           {payments.length === 0
             ? <Text size="small" color="muted">No payments</Text>
-            : <Table>
+            : <Table className="table-fixed w-full">
                 <TableHeader><TableRow>
-                  <TableHead>Type</TableHead><TableHead>Date</TableHead><TableHead>Reference</TableHead><TableHead>Amount</TableHead>
+                  <TableHead className="w-[20%]">Type</TableHead><TableHead className="w-[20%]">Date</TableHead><TableHead className="w-[40%]">Reference</TableHead><TableHead className="w-[20%]">Amount</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {payments.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell>{p.type}</TableCell>
                       <TableCell>{p.date}</TableCell>
-                      <TableCell>{p.referenceNo}</TableCell>
+                      <TableCell className="truncate">{p.referenceNo}</TableCell>
                       <TableCell>₱{p.amount.toLocaleString()}</TableCell>
                     </TableRow>
                   ))}

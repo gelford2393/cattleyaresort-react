@@ -87,14 +87,14 @@ export function BookingsPage() {
           )}
           {!isLoading && bookings.length > 0 && (
             <>
-              <Table>
+              <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Booking No</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Reserve Fee</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[30%]">Booking No</TableHead>
+                    <TableHead className="w-[28%]">Customer</TableHead>
+                    <TableHead className="w-[14%]">Total</TableHead>
+                    <TableHead className="w-[14%]">Reserve Fee</TableHead>
+                    <TableHead className="w-[14%]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -104,8 +104,8 @@ export function BookingsPage() {
                       className="cursor-pointer"
                       onClick={() => navigate(`/booking/${b.id}`)}
                     >
-                      <TableCell className="font-mono text-xs text-muted-foreground">{b.bookingNo}</TableCell>
-                      <TableCell className="font-medium">{b.customer}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground truncate">{b.bookingNo}</TableCell>
+                      <TableCell className="font-medium truncate">{b.customer}</TableCell>
                       <TableCell>₱{b.total.toLocaleString()}</TableCell>
                       <TableCell>₱{b.reserveFee.toLocaleString()}</TableCell>
                       <TableCell>

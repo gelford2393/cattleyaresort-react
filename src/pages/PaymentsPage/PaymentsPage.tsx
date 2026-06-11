@@ -107,14 +107,14 @@ export function PaymentsPage() {
           )}
           {!isLoading && payments.length > 0 && (
             <>
-              <Table>
+              <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Reference</TableHead>
-                    <TableHead>Booking No.</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="w-[15%]">Type</TableHead>
+                    <TableHead className="w-[15%]">Date</TableHead>
+                    <TableHead className="w-[25%]">Reference</TableHead>
+                    <TableHead className="w-[30%]">Booking No.</TableHead>
+                    <TableHead className="w-[15%] text-right">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -122,8 +122,8 @@ export function PaymentsPage() {
                     <TableRow key={p.id}>
                       <TableCell><Badge variant="secondary">{p.type}</Badge></TableCell>
                       <TableCell className="text-muted-foreground">{p.date}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{p.referenceNo || '—'}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{p.bookingNo}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground truncate">{p.referenceNo || '—'}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground truncate">{p.bookingNo}</TableCell>
                       <TableCell className="text-right font-medium">₱{p.amount.toLocaleString()}</TableCell>
                     </TableRow>
                   ))}

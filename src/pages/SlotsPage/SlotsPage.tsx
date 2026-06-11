@@ -84,13 +84,13 @@ export function SlotsPage() {
           )}
           {!isLoading && slots.length > 0 && (
             <>
-              <Table>
+              <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Pool</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Booking No.</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[22%]">Pool</TableHead>
+                    <TableHead className="w-[16%]">Type</TableHead>
+                    <TableHead className="w-[44%]">Booking No.</TableHead>
+                    <TableHead className="w-[18%]">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -100,11 +100,11 @@ export function SlotsPage() {
                       className="cursor-pointer"
                       onClick={() => navigate(`/booking/${s.bookingDocId ?? s.bookingNo}`)}
                     >
-                      <TableCell className="font-medium">{s.pool}</TableCell>
+                      <TableCell className="font-medium truncate">{s.pool}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{s.type}</Badge>
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{s.bookingNo}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground truncate">{s.bookingNo}</TableCell>
                       <TableCell>
                         <Badge variant={slotStatusVariant(s.status)}>{s.status}</Badge>
                       </TableCell>
