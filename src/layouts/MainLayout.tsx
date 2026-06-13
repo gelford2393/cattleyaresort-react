@@ -45,7 +45,20 @@ export function MainLayout() {
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => setOpen(true)}>
           <Menu className="h-5 w-5" />
         </Button>
-        <img src="/cattleyalogo.png" alt="logo" className="h-8 object-contain" />
+        {/* Pulse-ring logo */}
+        <div className="relative flex items-center justify-center shrink-0 h-9 w-9">
+          <span className="logo-ring-1 absolute inset-0 rounded-full border border-white/50" />
+          <span className="logo-ring-2 absolute inset-0 rounded-full border border-white/30" />
+          <span className="absolute inset-[-4px] rounded-full border border-white/15" />
+          <div
+            className="relative z-10 h-9 w-9 rounded-full p-[2px]"
+            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)' }}
+          >
+            <div className="h-full w-full rounded-full bg-white overflow-hidden flex items-center justify-center">
+              <img src="/cattleyalogo.png" alt="logo" className="h-full w-full object-cover scale-[1.15]" />
+            </div>
+          </div>
+        </div>
         <span className="flex-1 font-semibold text-sm">Cattleya Resort</span>
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => setIsDark((prev) => !prev)}>
           {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
