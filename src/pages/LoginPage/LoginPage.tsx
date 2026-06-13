@@ -7,25 +7,9 @@ export function LoginPage() {
   return (
     <>
       <style>{`
-        @keyframes ring-pulse {
-          0%   { transform: scale(1);    opacity: 0.5; }
-          70%  { transform: scale(1.55); opacity: 0;   }
-          100% { transform: scale(1.55); opacity: 0;   }
-        }
-        @keyframes ring-pulse-slow {
-          0%   { transform: scale(1);    opacity: 0.3; }
-          70%  { transform: scale(1.85); opacity: 0;   }
-          100% { transform: scale(1.85); opacity: 0;   }
-        }
         @keyframes fade-up {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0);    }
-        }
-        .login-ring-1 {
-          animation: ring-pulse 2.8s ease-out infinite;
-        }
-        .login-ring-2 {
-          animation: ring-pulse-slow 2.8s ease-out infinite 0.6s;
         }
         .login-fade-1 { animation: fade-up 0.5s ease both 0.1s; }
         .login-fade-2 { animation: fade-up 0.5s ease both 0.25s; }
@@ -43,8 +27,8 @@ export function LoginPage() {
           {/* Rings + logo */}
           <div className="login-fade-1 relative flex items-center justify-center mb-7">
             {/* Animated pulse rings */}
-            <span className="login-ring-1 absolute inset-0 rounded-full border border-primary/50" />
-            <span className="login-ring-2 absolute inset-0 rounded-full border border-primary/30" />
+            <span className="logo-ring-1 absolute inset-0 rounded-full border border-primary/50" />
+            <span className="logo-ring-2 absolute inset-0 rounded-full border border-primary/30" />
             {/* Static ring */}
             <span className="absolute inset-[-6px] rounded-full border border-primary/20" />
 
